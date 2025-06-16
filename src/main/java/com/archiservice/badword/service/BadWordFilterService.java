@@ -1,6 +1,7 @@
 package com.archiservice.badword.service;
 
 import com.archiservice.badword.domain.AhoCorasickAutomaton;
+import com.archiservice.badword.repository.AllowedWordRepository;
 import com.archiservice.badword.repository.BadWordRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -23,15 +24,18 @@ import java.util.stream.Collectors;
 public class BadWordFilterService {
 
     private final BadWordRepository badWordRepository;
+    private final AllowedWordRepository allowedWordRepository;
     private final RedisTemplate<String, Set<String>> redisTemplate;
 
     private volatile AhoCorasickAutomaton automaton;
-    private static final String REDIS_KEY = "bad_words";
+    private volatile Set<String> allowedWords;
+
+    private static final String REDIS_BAD_WORDS_KEY = "bad_words";
+    private static final String REDIS_ALLOWED_WORDS_KEY = "allowed_words";
     private static final Duration CACHE_TTL = Duration.ofHours(24);
 
     @PostConstruct
     public void initializeService() {
-        log.info("금칙어 필터링 서비스 초기화 시작");
         CompletableFuture.runAsync(this::buildAutomaton)
                 .thenRun(() -> log.info("Aho-Corasick 오토마톤 초기화 완료"))
                 .exceptionally(throwable -> {
@@ -42,7 +46,11 @@ public class BadWordFilterService {
 
     private void buildAutomaton() {
         try {
+            // 금칙어 로드
             Set<String> badWords = loadBadWordsFromCache();
+
+            // 허용단어 로드
+            loadAllowedWordsFromCache();
 
             // Aho-Corasick 오토마톤 구축
             automaton = new AhoCorasickAutomaton();
@@ -53,16 +61,115 @@ public class BadWordFilterService {
             }
 
             automaton.buildFailureLinks();
-            log.info("Aho-Corasick 오토마톤 구축 완료: {} 개 패턴", badWords.size());
+            log.info("Aho-Corasick 오토마톤 구축 완료: {} 개 패턴, {} 개 허용단어",
+                    badWords.size(), allowedWords != null ? allowedWords.size() : 0);
 
         } catch (Exception e) {
             log.error("오토마톤 구축 실패", e);
         }
     }
 
+    private void loadAllowedWordsFromCache() {
+        // 허용단어 캐시에서 로드
+        Set<String> cachedAllowedWords = redisTemplate.opsForValue().get(REDIS_ALLOWED_WORDS_KEY);
+
+        if (cachedAllowedWords != null) {
+            this.allowedWords = cachedAllowedWords;
+            log.debug("Redis에서 허용단어 {} 개 로드", allowedWords.size());
+            return;
+        }
+
+        // DB에서 로드
+        List<String> dbAllowedWords = allowedWordRepository.findAllWords();
+        this.allowedWords = new HashSet<>(dbAllowedWords);
+
+        // Redis에 캐싱
+        redisTemplate.opsForValue().set(REDIS_ALLOWED_WORDS_KEY, allowedWords, CACHE_TTL);
+        log.info("DB에서 허용단어 {} 개 로드 및 Redis 캐싱 완료", allowedWords.size());
+    }
+
+    public boolean containsBadWord(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return false;
+        }
+
+        if (automaton == null || allowedWords == null) {
+            log.warn("오토마톤이 초기화되지 않음. 동기식으로 초기화 진행");
+            buildAutomaton();
+        }
+
+        String normalizedContent = normalizeContent(content);
+        List<AhoCorasickAutomaton.MatchResult> matches = automaton.search(normalizedContent);
+
+        // 허용단어 필터링 적용
+        return matches.stream()
+                .anyMatch(match -> !isAllowedViolation(content, match));
+    }
+
+    public List<String> findBadWords(String content) {
+        if (content == null) return Collections.emptyList();
+
+        if (automaton == null || allowedWords == null) {
+            buildAutomaton();
+        }
+
+        String normalizedContent = normalizeContent(content);
+        List<AhoCorasickAutomaton.MatchResult> matches = automaton.search(normalizedContent);
+
+        return matches.stream()
+                .filter(match -> !isAllowedViolation(content, match))
+                .map(AhoCorasickAutomaton.MatchResult::getPattern)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    // 허용단어 검사 로직
+    private boolean isAllowedViolation(String originalContent, AhoCorasickAutomaton.MatchResult match) {
+        int start = match.getStartIndex();
+        int end = match.getEndIndex() + 1;
+
+        // 완전한 단어 추출하여 허용단어 체크
+        String fullWord = extractWordBoundary(originalContent, start, end);
+        return allowedWords.contains(fullWord.toLowerCase());
+    }
+
+    private String extractWordBoundary(String text, int start, int end) {
+        // 앞쪽으로 확장
+        while (start > 0 && isWordCharacter(text.charAt(start - 1))) {
+            start--;
+        }
+
+        // 뒤쪽으로 확장 (조사 제외)
+        while (end < text.length() && isWordCharacter(text.charAt(end))) {
+            // 한국어 조사 처리
+            if (isKoreanParticle(text, end)) {
+                break;
+            }
+            end++;
+        }
+
+        return text.substring(start, end);
+    }
+
+    private boolean isKoreanParticle(String text, int position) {
+        // 일반적인 한국어 조사들
+        String[] particles = {"이", "가", "을", "를", "은", "는", "에", "에서", "로", "으로"};
+        for (String particle : particles) {
+            if (text.substring(position).startsWith(particle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private boolean isWordCharacter(char c) {
+        return Character.isLetterOrDigit(c) ||
+                (c >= 0xAC00 && c <= 0xD7AF); // 한글 완성형
+    }
+
     private Set<String> loadBadWordsFromCache() {
-        // 1. Redis에서 조회
-        Set<String> cachedWords = redisTemplate.opsForValue().get(REDIS_KEY);
+        Set<String> cachedWords = redisTemplate.opsForValue().get(REDIS_BAD_WORDS_KEY);
         if (cachedWords != null && !cachedWords.isEmpty()) {
             log.debug("Redis에서 불용어 {} 개 로드", cachedWords.size());
             return cachedWords;
@@ -71,54 +178,21 @@ public class BadWordFilterService {
         List<String> dbWords = badWordRepository.findAllWords();
         Set<String> wordSet = new HashSet<>(dbWords);
 
-        redisTemplate.opsForValue().set(REDIS_KEY, wordSet, CACHE_TTL);
+        redisTemplate.opsForValue().set(REDIS_BAD_WORDS_KEY, wordSet, CACHE_TTL);
         log.info("DB에서 불용어 {} 개 로드 및 Redis 캐싱 완료", wordSet.size());
 
         return wordSet;
     }
 
-    public boolean containsBadWord(String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return false;
-        }
-
-        if (automaton == null) {
-            log.warn("오토마톤이 초기화되지 않음. 동기식으로 초기화 진행");
-            buildAutomaton();
-        }
-
-        String normalizedContent = normalizeContent(content);
-
-        // Aho-Corasick로 빠른 검색
-        List<AhoCorasickAutomaton.MatchResult> matches = automaton.search(normalizedContent);
-        return !matches.isEmpty();
-    }
-
-    public List<String> findBadWords(String content) {
-        if (content == null) return Collections.emptyList();
-
-        if (automaton == null) {
-            buildAutomaton();
-        }
-
-        String normalizedContent = normalizeContent(content);
-        List<AhoCorasickAutomaton.MatchResult> matches = automaton.search(normalizedContent);
-
-        return matches.stream()
-                .map(AhoCorasickAutomaton.MatchResult::getPattern)
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
     private String normalizeContent(String content) {
         return content.toLowerCase()
-                .replaceAll("\\s+", "")  // 공백 제거
-                .replaceAll("[^가-힣a-zA-Z0-9]", ""); // 특수문자 제거
+                .replaceAll("\\s+", "")
+                .replaceAll("[^가-힣a-zA-Z0-9]", "");
     }
 
-    // 12시간마다 금칙어 갱신 (TTL 만료 전에 미리 갱신)
     @Scheduled(fixedRate = 43200000)
     public void refreshAutomaton() {
         buildAutomaton();
     }
 }
+

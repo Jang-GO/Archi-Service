@@ -1,5 +1,6 @@
 package com.archiservice.common.jwt;
 
+import com.archiservice.common.security.CustomUser;
 import com.archiservice.common.security.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -32,24 +32,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
 
         String token = null;
-        String email = null;
+        Long userId = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7); // "Bearer " 제거
 
             try {
-                email = jwtUtil.extractEmail(token);
+                userId = jwtUtil.extractUserId(token);
             } catch (Exception e) {
-                log.error("JWT 토큰에서 사용자명 추출 실패: {}", e.getMessage());
+                log.error("JWT에서 사용자 ID 추출 실패: {}", e.getMessage());
             }
         }
 
         // 토큰이 유효하고 SecurityContext에 인증 정보가 없는 경우
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
+                CustomUser userDetails = userDetailsService.loadUserByUserId(userId);
+                
                 if (jwtUtil.validateToken(token, userDetails)) {
 
                     UsernamePasswordAuthenticationToken authToken =
@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.debug("JWT 인증 성공: {}", email);
+                    log.debug("JWT 인증 성공: {}", userId);
                 }
 
             } catch (Exception e) {

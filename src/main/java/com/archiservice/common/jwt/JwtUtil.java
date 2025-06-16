@@ -5,7 +5,6 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -33,8 +32,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public Long extractUserId(String token) {
+        try {
+            return Long.parseLong(extractClaim(token, Claims::getSubject));
+        } catch (NumberFormatException e) {
+            log.error("Invalid userId in token subject: {}", e.getMessage());
+            throw new IllegalArgumentException("Invalid userId format in token");
+        }
     }
 
     public Date extractExpiration(String token) {
@@ -77,34 +81,32 @@ public class JwtUtil {
 
     public String generateAccessToken(CustomUser customUser) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", customUser.getId());
         claims.put("tagCode", customUser.getTagCode());
         claims.put("ageCode", customUser.getAgeCode());
-        return createToken(claims, customUser.getUsername(), accessTokenExpiration);
+        return createToken(claims, customUser.getId(), accessTokenExpiration);
     }
 
     public String generateRefreshToken(CustomUser customUser) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", customUser.getId());
         claims.put("tagCode", customUser.getTagCode());
         claims.put("ageCode", customUser.getAgeCode());
-        return createToken(claims, customUser.getUsername(), refreshTokenExpiration);
+        return createToken(claims, customUser.getId(), refreshTokenExpiration);
     }
 
-    private String createToken(Map<String, Object> claims, String subject, Long expiration) {
+    private String createToken(Map<String, Object> claims, Long subject, Long expiration) {
         return Jwts.builder()
                 .claims(claims)
-                .subject(subject)
+                .subject(String.valueOf(subject))
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(String token, CustomUser customUser) {
         try {
-            final String username = extractEmail(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            final Long userId = extractUserId(token);
+            return (userId.equals(customUser.getId()) && !isTokenExpired(token));
         } catch (Exception e) {
             log.error("Token validation failed: {}", e.getMessage());
             return false;
@@ -121,24 +123,10 @@ public class JwtUtil {
         }
     }
     
-    public String generateCustomToken(Map<String, Object> claims, String subject) {
+    public String generateCustomToken(Map<String, Object> claims, Long subject) {
     	return createToken(claims, subject, accessTokenExpiration);
     }
 
-
-    public Long extractUserId(String token) {
-        final Claims claims = extractAllClaims(token);
-        Object userId = claims.get("userId");
-        if (userId instanceof Integer) {
-            return ((Integer) userId).longValue();
-        } else if (userId instanceof Long) {
-            return (Long) userId;
-        } else if (userId instanceof String) {
-            return Long.parseLong((String) userId);
-        } else {
-            throw new IllegalArgumentException("Invalid userId type in token: " + userId);
-        }
-    }
 
     public Long extractTagCode(String token) {
         final Claims claims = extractAllClaims(token);

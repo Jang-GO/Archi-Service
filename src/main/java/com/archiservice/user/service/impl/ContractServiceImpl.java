@@ -1,9 +1,9 @@
 package com.archiservice.user.service.impl;
 
-import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
+import com.archiservice.exception.business.ContractNotFoundException;
 import com.archiservice.exception.business.UserNotFoundException;
 import com.archiservice.product.bundle.domain.ProductBundle;
 import com.archiservice.product.bundle.repository.ProductBundleRepository;
@@ -152,5 +152,28 @@ public class ContractServiceImpl implements ContractService {
         } else {
             updateNextContract(requestDto, customUser);
         }
+    }
+
+    @Override
+    @Transactional
+    public void renewContract(LocalDate today) {
+        List<Contract> expiredContractList = contractRepository.findByEndDate(today)
+                .orElseThrow(() -> new ContractNotFoundException(ErrorCode.CONTRACT_NOT_FOUND.getMessage()));
+
+        for(Contract contract : expiredContractList) {
+            User user = contract.getUser();
+
+            Contract renewedContract = Contract.builder()
+                    .productBundle(contract.getProductBundle())
+                    .user(user)
+                    .paymentMethod(contract.getPaymentMethod())
+                    .price(contract.getPrice())
+                    .startDate(today.atStartOfDay().plusDays(1))
+                    .endDate((today.atStartOfDay().plusMonths(1)))
+                    .build();
+
+            contractRepository.save(renewedContract);
+        }
+
     }
 }

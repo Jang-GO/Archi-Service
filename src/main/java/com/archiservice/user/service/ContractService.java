@@ -9,6 +9,7 @@ import com.archiservice.user.dto.request.ReservationRequestDto;
 import com.archiservice.user.dto.response.ContractDetailResponseDto;
 import com.archiservice.user.enums.Period;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ContractService {
@@ -23,4 +24,6 @@ public interface ContractService {
     void updateNextContract(ReservationRequestDto requestDto, CustomUser customUser); // 예약 변경 버튼을 누르면 예약을 해당 조합으로 바꾸는 서비스
 
     void determineContractAction(ReservationRequestDto requestDto, CustomUser customUser);
+
+    void renewContract(LocalDate today);
 }

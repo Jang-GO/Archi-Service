@@ -24,7 +24,9 @@ import com.archiservice.product.vas.service.VasService;
 import com.archiservice.user.dto.request.ReservationRequestDto;
 import com.archiservice.user.repository.UserRepository;
 import com.archiservice.user.service.ContractService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -145,4 +147,24 @@ public class ProductBundleServiceImpl implements ProductBundleService {
         }
 
     }
+
+    @Override
+    public long getCombinedTagCode(long planId, long vasId, long couponId) {
+
+        long planTagCode = planRepository.findById(planId)
+                .orElseThrow(() -> new EntityNotFoundException("Plan not found"))
+                .getTagCode();
+
+        long vasTagCode = vasRepository.findById(vasId)
+                .orElseThrow(() -> new EntityNotFoundException("VAS not found"))
+                .getTagCode();
+
+        long couponTagCode = couponRepository.findById(couponId)
+                .orElseThrow(() -> new EntityNotFoundException("Coupon not found"))
+                .getTagCode();
+
+        return planTagCode | vasTagCode | couponTagCode;
+    }
+
+
 }

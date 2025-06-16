@@ -13,7 +13,7 @@ public class ContractScheduler {
 
     private final ContractService contractService;
 
-    @Scheduled(cron = "0 56 15 * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void renewContractAction() {
         contractService.renewContract(LocalDate.now());
     }

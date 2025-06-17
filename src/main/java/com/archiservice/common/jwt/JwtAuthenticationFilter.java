@@ -44,7 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 토큰이 유효하고 SecurityContext에 인증 정보가 없는 경우
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             try {

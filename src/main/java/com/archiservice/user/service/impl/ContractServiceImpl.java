@@ -42,9 +42,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    // Issue : Scheduling Batch, User 를 받는 방식 고민 (시스템이 자동 추가해야하므로, 유저가 직접 추가하는 방식이 아님 -> 현재 컨트롤러가 아닌, 신규 번들 생성 이후 연계로 실행되는 형태)
     public void createContract(ReservationRequestDto requestDto, User user) {
-        // 다음달 계약이 생성되는 시점에는 가장 최근건이 이번달 계약임. -> top1 사용
 
         ProductBundle bundle = productBundleRepository.findById(requestDto.getBundleId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "조합 정보가 존재하지 않음"));

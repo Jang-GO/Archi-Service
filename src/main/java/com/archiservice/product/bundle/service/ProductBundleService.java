@@ -11,4 +11,5 @@ public interface ProductBundleService {
 
     void updateLikeOrDislikeCount(long bundleId, boolean isLike);
 
+    long getCombinedTagCode(long planId, long vasId, long couponId);
 }

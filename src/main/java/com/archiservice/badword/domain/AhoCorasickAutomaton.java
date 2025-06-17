@@ -29,13 +29,11 @@ public class AhoCorasickAutomaton {
     public void buildFailureLinks() {
         Queue<TrieNode> queue = new ArrayDeque<>();
 
-        // 루트의 자식들 초기화
         for (TrieNode child : root.children.values()) {
             child.failure = root;
             queue.offer(child);
         }
 
-        // BFS로 failure link 구축
         while (!queue.isEmpty()) {
             TrieNode current = queue.poll();
 
@@ -67,7 +65,6 @@ public class AhoCorasickAutomaton {
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
 
-            // failure link를 따라 이동
             while (current != null && !current.children.containsKey(c)) {
                 current = current.failure;
             }
@@ -79,7 +76,6 @@ public class AhoCorasickAutomaton {
 
             current = current.children.get(c);
 
-            // 매칭된 패턴들 수집
             for (Integer patternIndex : current.output) {
                 String pattern = patterns.get(patternIndex);
                 results.add(new MatchResult(i - pattern.length() + 1, i, pattern));

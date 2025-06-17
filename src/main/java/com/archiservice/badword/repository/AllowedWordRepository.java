@@ -12,7 +12,5 @@ public interface AllowedWordRepository extends JpaRepository<AllowedWord, Long> 
 
     @Query("SELECT aw.word FROM AllowedWord aw")
     List<String> findAllWords();
-
-    boolean existsByWord(String word);
 }
 

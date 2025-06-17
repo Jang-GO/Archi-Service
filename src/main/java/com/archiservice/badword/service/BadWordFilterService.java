@@ -46,13 +46,10 @@ public class BadWordFilterService {
 
     private void buildAutomaton() {
         try {
-            // 금칙어 로드
             Set<String> badWords = loadBadWordsFromCache();
 
-            // 허용단어 로드
             loadAllowedWordsFromCache();
 
-            // Aho-Corasick 오토마톤 구축
             automaton = new AhoCorasickAutomaton();
             int patternIndex = 0;
 
@@ -70,7 +67,6 @@ public class BadWordFilterService {
     }
 
     private void loadAllowedWordsFromCache() {
-        // 허용단어 캐시에서 로드
         Set<String> cachedAllowedWords = redisTemplate.opsForValue().get(REDIS_ALLOWED_WORDS_KEY);
 
         if (cachedAllowedWords != null) {
@@ -79,11 +75,9 @@ public class BadWordFilterService {
             return;
         }
 
-        // DB에서 로드
         List<String> dbAllowedWords = allowedWordRepository.findAllWords();
         this.allowedWords = new HashSet<>(dbAllowedWords);
 
-        // Redis에 캐싱
         redisTemplate.opsForValue().set(REDIS_ALLOWED_WORDS_KEY, allowedWords, CACHE_TTL);
         log.info("DB에서 허용단어 {} 개 로드 및 Redis 캐싱 완료", allowedWords.size());
     }
@@ -101,7 +95,6 @@ public class BadWordFilterService {
         String normalizedContent = normalizeContent(content);
         List<AhoCorasickAutomaton.MatchResult> matches = automaton.search(normalizedContent);
 
-        // 허용단어 필터링 적용
         return matches.stream()
                 .anyMatch(match -> !isAllowedViolation(content, match));
     }
@@ -123,25 +116,20 @@ public class BadWordFilterService {
                 .collect(Collectors.toList());
     }
 
-    // 허용단어 검사 로직
     private boolean isAllowedViolation(String originalContent, AhoCorasickAutomaton.MatchResult match) {
         int start = match.getStartIndex();
         int end = match.getEndIndex() + 1;
 
-        // 완전한 단어 추출하여 허용단어 체크
         String fullWord = extractWordBoundary(originalContent, start, end);
         return allowedWords.contains(fullWord.toLowerCase());
     }
 
     private String extractWordBoundary(String text, int start, int end) {
-        // 앞쪽으로 확장
         while (start > 0 && isWordCharacter(text.charAt(start - 1))) {
             start--;
         }
 
-        // 뒤쪽으로 확장 (조사 제외)
         while (end < text.length() && isWordCharacter(text.charAt(end))) {
-            // 한국어 조사 처리
             if (isKoreanParticle(text, end)) {
                 break;
             }
@@ -152,7 +140,6 @@ public class BadWordFilterService {
     }
 
     private boolean isKoreanParticle(String text, int position) {
-        // 일반적인 한국어 조사들
         String[] particles = {"이", "가", "을", "를", "은", "는", "에", "에서", "로", "으로"};
         for (String particle : particles) {
             if (text.substring(position).startsWith(particle)) {
@@ -165,7 +152,7 @@ public class BadWordFilterService {
 
     private boolean isWordCharacter(char c) {
         return Character.isLetterOrDigit(c) ||
-                (c >= 0xAC00 && c <= 0xD7AF); // 한글 완성형
+                (c >= 0xAC00 && c <= 0xD7AF);
     }
 
     private Set<String> loadBadWordsFromCache() {

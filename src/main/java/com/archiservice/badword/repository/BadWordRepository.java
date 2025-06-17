@@ -12,6 +12,5 @@ public interface BadWordRepository extends JpaRepository<BadWord, Long> {
 
     @Query("SELECT bw.word FROM BadWord bw")
     List<String> findAllWords();
-
 }
 

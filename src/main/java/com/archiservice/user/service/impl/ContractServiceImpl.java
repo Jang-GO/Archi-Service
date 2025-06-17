@@ -1,9 +1,9 @@
 package com.archiservice.user.service.impl;
 
-import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
+import com.archiservice.exception.business.ContractNotFoundException;
 import com.archiservice.exception.business.UserNotFoundException;
 import com.archiservice.product.bundle.domain.ProductBundle;
 import com.archiservice.product.bundle.repository.ProductBundleRepository;
@@ -42,9 +42,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    // Issue : Scheduling Batch, User 를 받는 방식 고민 (시스템이 자동 추가해야하므로, 유저가 직접 추가하는 방식이 아님 -> 현재 컨트롤러가 아닌, 신규 번들 생성 이후 연계로 실행되는 형태)
     public void createContract(ReservationRequestDto requestDto, User user) {
-        // 다음달 계약이 생성되는 시점에는 가장 최근건이 이번달 계약임. -> top1 사용
 
         ProductBundle bundle = productBundleRepository.findById(requestDto.getBundleId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "조합 정보가 존재하지 않음"));
@@ -152,5 +150,28 @@ public class ContractServiceImpl implements ContractService {
         } else {
             updateNextContract(requestDto, customUser);
         }
+    }
+
+    @Override
+    @Transactional
+    public void renewContract(LocalDate today) {
+        List<Contract> expiredContractList = contractRepository.findByEndDate(today)
+                .orElseThrow(() -> new ContractNotFoundException(ErrorCode.CONTRACT_NOT_FOUND.getMessage()));
+
+        for(Contract contract : expiredContractList) {
+            User user = contract.getUser();
+
+            Contract renewedContract = Contract.builder()
+                    .productBundle(contract.getProductBundle())
+                    .user(user)
+                    .paymentMethod(contract.getPaymentMethod())
+                    .price(contract.getPrice())
+                    .startDate(today.atStartOfDay().plusDays(1))
+                    .endDate((today.atStartOfDay().plusMonths(1)))
+                    .build();
+
+            contractRepository.save(renewedContract);
+        }
+
     }
 }

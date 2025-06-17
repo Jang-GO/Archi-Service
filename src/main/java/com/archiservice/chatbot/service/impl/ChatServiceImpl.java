@@ -14,6 +14,7 @@ import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
 import com.archiservice.user.domain.User;
 import com.archiservice.user.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.util.Comparator;
@@ -38,6 +39,8 @@ public class ChatServiceImpl implements ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final RedisTemplate<String, ChatMessageDto> chatMessageRedisTemplate;
     private final AiService aiService;
+    private final ObjectMapper objectMapper;
+
 
     @Override
     public void handleUserMessage(ChatMessageRequestDto request, AuthInfo authInfo) {
@@ -71,20 +74,24 @@ public class ChatServiceImpl implements ChatService {
     public List<ChatMessageDto> loadChatHistory(Long userId, int page, int size) {
         String key = "chat:user:" + userId;
 
-        List<ChatMessageDto> cached = chatMessageRedisTemplate.opsForList().range(key, 0, -1);
+        List<Object> rawList = (List<Object>) (List<?>) chatMessageRedisTemplate.opsForList().range(key, 0, -1);
 
-        if (cached != null && !cached.isEmpty()) {
-            int from = page * size;
-            int to = Math.min(from + size, cached.size());
+        List<ChatMessageDto> cached = rawList.stream()
+            .map(obj -> objectMapper.convertValue(obj, ChatMessageDto.class))
+            .toList();
 
-            if (from < cached.size()) {
-                return cached.subList(from, to).stream()
-                    .sorted(Comparator.comparing(ChatMessageDto::getTimestamp))
-                    .collect(Collectors.toList());
+        if (!cached.isEmpty()) {
+            int total = cached.size();
+            int from = Math.max(total - (page + 1) * size, 0);
+            int to = total - page * size;
+
+            if (from < to) {
+                return cached.subList(from, to);
             }
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        // fallback: DB 조회 시도 (최신순 정렬)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Chat> chatPage = chatRepository.findByUser_UserId(userId, pageable);
 
         return chatPage.stream()

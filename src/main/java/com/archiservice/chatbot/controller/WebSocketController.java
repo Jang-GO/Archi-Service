@@ -19,9 +19,8 @@ public class WebSocketController {
     @MessageMapping("/chat/sendMessage")
     public void sendMessage(
             @Payload ChatMessageRequestDto message,
-            Principal principal
+            AuthInfo authInfo
     ) {
-            AuthInfo authInfo = (AuthInfo) principal;
             chatService.handleUserMessage(message, authInfo);
     }
 }

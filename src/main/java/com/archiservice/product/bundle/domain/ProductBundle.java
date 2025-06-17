@@ -4,6 +4,7 @@ import com.archiservice.product.coupon.domain.Coupon;
 import com.archiservice.product.plan.domain.Plan;
 import com.archiservice.product.vas.domain.Vas;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "product_bundles")
@@ -45,13 +48,4 @@ public class ProductBundle {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Builder
-    public ProductBundle(Plan plan, Vas vas, Coupon coupon, long tagCode) {
-        this.plan = plan;
-        this.vas = vas;
-        this.coupon = coupon;
-        this.likeCount = 0L;
-        this.dislikeCount = 0L;
-        this.tagCode = tagCode;
-    }
 }

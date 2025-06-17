@@ -81,8 +81,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         String query = request.getURI().getQuery();
         if (query != null) {
             for (String param : query.split("&")) {
-                if (param.startsWith("accessToken=")) {
-                    String token = param.substring(12);
+                if (param.startsWith("token=")) {
+                    String token = param.substring(6);
                     return token;
                 }
             }

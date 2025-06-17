@@ -53,7 +53,6 @@ public class CustomUser implements UserDetails {
         return true;
     }
 
-    // User 엔터티 접근 메서드
     public Long getId() {
         return user.getUserId();
     }

@@ -4,6 +4,6 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class RefreshResponseDto {
-    private String email;
+    private Long userId;
     private String newAccessToken;
 }

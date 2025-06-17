@@ -27,8 +27,9 @@ public class SuerveyController {
 	public ResponseEntity<ApiResponse<QuestionResponseDto>> getQuestion(
 			@RequestParam(required = false, name = "nextQuestionId") Long nextQuestionId,
 			@RequestParam(required = false, name = "tagCode") Long tagCode,
+			@RequestParam(defaultValue = "false", name = "fromPrevious") boolean fromPrevious,
 			HttpSession session){
-		return ResponseEntity.ok(surveyService.getQuestion(nextQuestionId, tagCode, session));
+		return ResponseEntity.ok(surveyService.getQuestion(nextQuestionId, tagCode, fromPrevious, session));
 	}
 	
 	@PostMapping("/save")
@@ -38,5 +39,10 @@ public class SuerveyController {
 		Long userId = customUser.getId();
 		return ResponseEntity.ok(surveyService.saveResult(userId, session));
 	}
+	
+	@GetMapping("/previous")
+    public ApiResponse<QuestionResponseDto> previousQuestion(HttpSession session) {
+        return surveyService.getPreviousQuestion(session);
+    }
 }
 

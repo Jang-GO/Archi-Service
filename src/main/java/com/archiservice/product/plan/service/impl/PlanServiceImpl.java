@@ -3,6 +3,10 @@ package com.archiservice.product.plan.service.impl;
 import java.util.List;
 import java.util.Optional;
 
+import com.archiservice.product.coupon.dto.response.CouponDetailResponseDto;
+import com.archiservice.review.summary.domain.ProductReviewSummary;
+import com.archiservice.review.summary.dto.SimplifiedSummaryResult;
+import com.archiservice.review.summary.repository.ProductReviewSummaryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final TagMetaService tagMetaService;
     private final CommonCodeService commonCodeService;
+    private final ProductReviewSummaryRepository reviewSummaryRepository;
 
     public static final String CATEGORY_GROUP_CODE = "G02";
     public static final String AGE_GROUP_CODE = "G01";
@@ -53,8 +58,13 @@ public class PlanServiceImpl implements PlanService {
         String category = commonCodeService.getCodeName(CATEGORY_GROUP_CODE, plan.getCategoryCode());
         String targetAge = commonCodeService.getCodeName(AGE_GROUP_CODE, plan.getAgeCode());
 
-        return PlanDetailResponseDto.from(plan, tags, category, targetAge);
+        Optional<ProductReviewSummary> reviewSummaryOpt = reviewSummaryRepository.findByProductIdAndReviewType(planId, "PLAN");
+        if(reviewSummaryOpt.isEmpty()) return PlanDetailResponseDto.from(plan, tags, category,targetAge);
+
+        SimplifiedSummaryResult simplifiedSummaryResult = SimplifiedSummaryResult.from(reviewSummaryOpt.get());
+        return PlanDetailResponseDto.from(plan, tags, category, targetAge, simplifiedSummaryResult);
     }
+
     @Override
     public PlanDetailResponseDto findPlanByName(String planName) {
         Optional<Plan> exactMatch = planRepository.findByPlanName(planName);

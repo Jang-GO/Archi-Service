@@ -1,7 +1,7 @@
-package com.archiservice.review.ai.service;
+package com.archiservice.review.moderation.service;
 
-import com.archiservice.review.ai.dto.ModerationResult;
-import com.archiservice.review.ai.dto.ReviewAnalysisResult;
+import com.archiservice.review.moderation.dto.ModerationResult;
+import com.archiservice.review.moderation.dto.ReviewAnalysisResult;
 import com.archiservice.review.coupon.domain.CouponReview;
 import com.archiservice.review.coupon.repository.CouponReviewRepository;
 import com.archiservice.review.plan.domain.PlanReview;

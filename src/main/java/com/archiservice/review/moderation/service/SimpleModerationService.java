@@ -1,4 +1,4 @@
-package com.archiservice.review.ai.service;
+package com.archiservice.review.moderation.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.moderation.*;

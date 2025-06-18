@@ -1,4 +1,4 @@
-package com.archiservice.review.ai.dto;
+package com.archiservice.review.moderation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

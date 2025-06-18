@@ -1,7 +1,6 @@
-package com.archiservice.review.ai.service;
+package com.archiservice.review.moderation.service;
 
-import com.archiservice.review.ai.dto.ReviewAnalysisResult;
-import com.archiservice.review.ai.service.SimpleModerationService;
+import com.archiservice.review.moderation.dto.ReviewAnalysisResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;

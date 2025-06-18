@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TendencyImageRequestDto {
-  private Long userId;
+  private String userId;
   private String base64Image;
 
-  public static TendencyImageRequestDto of(Long userId, String base64Image) {
+  public static TendencyImageRequestDto of(String userId, String base64Image) {
     return new TendencyImageRequestDto(userId, base64Image);
   }
 }

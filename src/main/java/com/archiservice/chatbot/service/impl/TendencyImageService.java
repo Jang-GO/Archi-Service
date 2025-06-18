@@ -2,6 +2,7 @@ package com.archiservice.chatbot.service.impl;
 
 import com.archiservice.chatbot.dto.ChatMessageDto;
 import com.archiservice.chatbot.dto.request.TendencyImageRequestDto;
+import com.archiservice.chatbot.dto.response.TendencyImageResultDto;
 import com.archiservice.chatbot.redis.AiImageRequestProducer;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
@@ -53,7 +54,7 @@ public class TendencyImageService {
     }
 
     // 인공지능 서버에 전달
-    TendencyImageRequestDto dto = TendencyImageRequestDto.of(userId,base64Image);
+    TendencyImageRequestDto dto = TendencyImageRequestDto.of(userId.toString(),base64Image);
 
     aiImageRequestProducer.sendToAI(dto);
 
@@ -72,6 +73,16 @@ public class TendencyImageService {
 
 
 
+  }
+  public void handleTendencyImageResult(TendencyImageResultDto dto){
+    // TODO: 메시지 2개 생성 (summary + tags)
+    // Ex : ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, summary);
+    //      ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, tags);
+    // TODO: ChatMessageDto 변환 및 Redis 저장 (history)
+    // repo.save
+    // redis.save
+    // TODO: WebSocket 전송
+    //messageTemplate~
   }
 
   //메시지 dto 에 맞게 변환?

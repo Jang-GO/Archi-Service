@@ -37,6 +37,9 @@ public class VasReview extends TimeStamp {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "is_moderated", nullable = false)
+    private Boolean isModerated = false;
+
     @Builder
     public VasReview(User user, Vas vas, Integer score, String content) {
         this.user = user;
@@ -54,5 +57,9 @@ public class VasReview extends TimeStamp {
         if (!this.user.getUserId().equals(userId)) {
             throw new NotMyReviewException(ErrorCode.NOT_MY_REVIEW.getMessage());
         }
+    }
+
+    public void markAsModerated() {
+        this.isModerated = true;
     }
 }

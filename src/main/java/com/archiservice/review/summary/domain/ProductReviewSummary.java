@@ -65,4 +65,18 @@ public class ProductReviewSummary extends TimeStamp {
         this.mediumRatingCount = mediumRatingCount;
         this.summaryDate = LocalDate.now();
     }
+
+    public void updateSummary(Integer totalReviewCount, Double averageScore,
+                              String highRatingSummary, Integer highRatingCount,
+                              String lowRatingSummary, Integer lowRatingCount,
+                              Integer mediumRatingCount) {
+        this.totalReviewCount = totalReviewCount;
+        this.averageScore = averageScore;
+        this.highRatingSummary = highRatingSummary;
+        this.highRatingCount = highRatingCount;
+        this.lowRatingSummary = lowRatingSummary;
+        this.lowRatingCount = lowRatingCount;
+        this.mediumRatingCount = mediumRatingCount;
+        this.summaryDate = LocalDate.now(); // 업데이트 날짜 갱신
+    }
 }

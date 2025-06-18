@@ -44,7 +44,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                               WebSocketHandler wsHandler,
                                               Map<String, Object> attributes) {
                 String token = extractTokenFromRequest(request);
-                System.out.println("token : " + token);
 
                 if (token != null) {
                     boolean isValid = jwtTokenProvider.validateToken(token);

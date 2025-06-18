@@ -56,7 +56,6 @@ public class SurveyServiceImpl implements SurveyService{
 	    session.setAttribute("tagCodeSum", tagCodeSum);
 	    
 		if (nextQuestionId == null) {
-			// 성향 테스트 종료 지점
 			List<String> tagCodes = metaService.extractTagsFromCode(tagCodeSum);
 			return ApiResponse.success(new QuestionResponseDto("성향 테스트 종료", 0, List.of(), tagCodes));
 		}
@@ -75,7 +74,7 @@ public class SurveyServiceImpl implements SurveyService{
 		User user = userRepository.findById(userId)
 		        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 		
-		Long tagCode = (Long) session.getAttribute("tagCodeSum"); // List
+		Long tagCode = (Long) session.getAttribute("tagCodeSum");
 		
 		if (tagCode == null) {
 		    throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "저장된 태그코드가 없습니다.");
@@ -88,7 +87,7 @@ public class SurveyServiceImpl implements SurveyService{
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("userId", userId);
 		claims.put("tagCode", tagCode);
-		String tagCodeAccessToken = jwtUtil.generateCustomToken(claims, user.getEmail());
+		String tagCodeAccessToken = jwtUtil.generateCustomToken(claims, user.getUserId());
 		
 		session.removeAttribute("tagCodeSum");
 		session.removeAttribute("questionHistory");

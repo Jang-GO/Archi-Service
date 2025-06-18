@@ -8,15 +8,17 @@ import com.archiservice.review.summary.dto.SimplifiedSummaryResult;
 import com.archiservice.review.summary.dto.SummaryResult;
 import com.archiservice.review.summary.repository.ProductReviewSummaryRepository;
 import com.archiservice.review.vas.repository.VasReviewRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -28,47 +30,57 @@ public class ProductReviewSummaryService {
     private final VasReviewRepository vasReviewRepository;
     private final CouponReviewRepository couponReviewRepository;
     private final ProductReviewSummaryRepository summaryRepository;
+    private final TaskExecutor taskExecutor;
 
     public ProductReviewSummaryService(CouponReviewRepository couponReviewRepository,
                                        @Qualifier("reviewSummaryBot") ChatClient summaryChatClient,
                                        PlanReviewRepository planReviewRepository,
                                        VasReviewRepository vasReviewRepository,
-                                       ProductReviewSummaryRepository summaryRepository) {
+                                       ProductReviewSummaryRepository summaryRepository,
+                                       @Qualifier("summaryTaskExecutor") TaskExecutor taskExecutor) {
         this.couponReviewRepository = couponReviewRepository;
         this.summaryChatClient = summaryChatClient;
         this.planReviewRepository = planReviewRepository;
         this.vasReviewRepository = vasReviewRepository;
         this.summaryRepository = summaryRepository;
+        this.taskExecutor = taskExecutor;
     }
 
-    public SummaryResult summarizeAllProductReviews() {
+    @Async
+    public CompletableFuture<SummaryResult> summarizeAllProductReviews() {
         log.info("=== 전체 상품 리뷰 요약 작업 시작 ===");
 
         long startTime = System.currentTimeMillis();
 
-        SummaryResult planResult = summarizePlanReviews();
-        SummaryResult vasResult = summarizeVasReviews();
-        SummaryResult couponResult = summarizeCouponReviews();
+        CompletableFuture<SummaryResult> planFuture = CompletableFuture.supplyAsync(this::summarizePlanReviews, taskExecutor);
+        CompletableFuture<SummaryResult> vasFuture = CompletableFuture.supplyAsync(this::summarizeVasReviews, taskExecutor);
+        CompletableFuture<SummaryResult> couponFuture = CompletableFuture.supplyAsync(this::summarizeCouponReviews, taskExecutor);
 
-        long processingTime = System.currentTimeMillis() - startTime;
+        return CompletableFuture.allOf(planFuture, vasFuture, couponFuture)
+                .thenApply(v -> {
+                    try {
+                        SummaryResult planResult = planFuture.get();
+                        SummaryResult vasResult = vasFuture.get();
+                        SummaryResult couponResult = couponFuture.get();
 
-        SummaryResult totalResult = SummaryResult.builder()
-                .totalProducts(planResult.getTotalProducts() +
-                        vasResult.getTotalProducts() +
-                        couponResult.getTotalProducts())
-                .summarizedProducts(planResult.getSummarizedProducts() +
-                        vasResult.getSummarizedProducts() +
-                        couponResult.getSummarizedProducts())
-                .processingTimeMs(processingTime)
-                .build();
+                        long processingTime = System.currentTimeMillis() - startTime;
 
-        log.info("=== 전체 상품 리뷰 요약 작업 완료 ===");
-        log.info("총 상품: {}, 요약 완료: {}, 소요시간: {}ms",
-                totalResult.getTotalProducts(),
-                totalResult.getSummarizedProducts(),
-                totalResult.getProcessingTimeMs());
+                        log.info("=== 전체 상품 리뷰 요약 작업 완료 ===");
 
-        return totalResult;
+                        return SummaryResult.builder()
+                                .totalProducts(planResult.getTotalProducts() +
+                                        vasResult.getTotalProducts() +
+                                        couponResult.getTotalProducts())
+                                .summarizedProducts(planResult.getSummarizedProducts() +
+                                        vasResult.getSummarizedProducts() +
+                                        couponResult.getSummarizedProducts())
+                                .processingTimeMs(processingTime)
+                                .build();
+                    } catch (Exception e) {
+                        log.error("병렬 처리 결과 수집 중 오류", e);
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     private SummaryResult summarizePlanReviews() {
@@ -185,18 +197,18 @@ public class ProductReviewSummaryService {
         }
 
         prompt.append("""
-        Provide a summary in the following JSON format:
-        {
-            "highRatingSummary": "Summarize common positive aspects from high-rating reviews in 2-3 sentences",
-            "lowRatingSummary": "Summarize common negative aspects from low-rating reviews in 2-3 sentences",
-            "averageScore": Calculate overall satisfaction as a decimal between 1.0-5.0
-        }
-        
-        Guidelines:
-        - If no reviews exist for a rating category, write "No reviews available for this rating range"
-        - Focus on specific service features rather than general emotions
-        - Use natural sentences, not keywords or bullet points
-        """);
+                Provide a summary in the following JSON format:
+                        {
+                            "highRatingSummary": "Summarize common positive opinions from high-rating reviews in natural Korean (2-3 sentences)",
+                            "lowRatingSummary": "Summarize common negative opinions from low-rating reviews in natural Korean (2-3 sentences)",
+                            "averageScore": Evaluate overall review satisfaction as a decimal between 1.0-5.0
+                        }
+                
+                Guidelines:
+                - If no reviews exist for a rating category, write "No reviews available for this rating range"
+                - Focus on specific service features rather than general emotions
+                - Use natural sentences, not keywords or bullet points
+                """);
 
         return prompt.toString();
     }

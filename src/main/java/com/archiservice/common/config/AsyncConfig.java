@@ -10,13 +10,24 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig {
 
-    @Bean(name = "moderationTaskExecutor")
+    @Bean
     public TaskExecutor moderationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(3);
         executor.setMaxPoolSize(6);
         executor.setQueueCapacity(10);
         executor.setThreadNamePrefix("Moderation-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
+    public TaskExecutor summaryTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(3);
+        executor.setMaxPoolSize(6);
+        executor.setQueueCapacity(10);
+        executor.setThreadNamePrefix("Summary-");
         executor.initialize();
         return executor;
     }

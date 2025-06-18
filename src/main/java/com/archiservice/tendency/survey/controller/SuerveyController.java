@@ -1,4 +1,4 @@
-package com.archiservice.survey.controller;
+package com.archiservice.tendency.survey.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
-import com.archiservice.survey.dto.response.QuestionResponseDto;
-import com.archiservice.survey.service.SurveyService;
+import com.archiservice.tendency.survey.dto.response.QuestionResponseDto;
+import com.archiservice.tendency.survey.service.SurveyService;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

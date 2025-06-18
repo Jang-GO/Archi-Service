@@ -1,4 +1,4 @@
-package com.archiservice.survey.domain;
+package com.archiservice.tendency.survey.domain;
 
 import java.util.List;
 

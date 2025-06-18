@@ -1,6 +1,6 @@
-package com.archiservice.survey.dto.response;
+package com.archiservice.tendency.survey.dto.response;
 
-import com.archiservice.survey.domain.Option;
+import com.archiservice.tendency.survey.domain.Option;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

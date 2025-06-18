@@ -1,8 +1,8 @@
-package com.archiservice.survey.dto.response;
+package com.archiservice.tendency.survey.dto.response;
 
 import java.util.List;
 
-import com.archiservice.survey.domain.Question;
+import com.archiservice.tendency.survey.domain.Question;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

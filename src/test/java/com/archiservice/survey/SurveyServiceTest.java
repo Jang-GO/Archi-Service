@@ -20,11 +20,11 @@ import org.mockito.MockitoAnnotations;
 import com.archiservice.code.tagmeta.service.TagMetaService;
 import com.archiservice.common.response.ApiResponse;
 import com.archiservice.exception.BusinessException;
-import com.archiservice.survey.domain.Option;
-import com.archiservice.survey.domain.Question;
-import com.archiservice.survey.dto.response.QuestionResponseDto;
-import com.archiservice.survey.repository.QuestionRepository;
-import com.archiservice.survey.service.impl.SurveyServiceImpl;
+import com.archiservice.tendency.survey.domain.Option;
+import com.archiservice.tendency.survey.domain.Question;
+import com.archiservice.tendency.survey.dto.response.QuestionResponseDto;
+import com.archiservice.tendency.survey.repository.QuestionRepository;
+import com.archiservice.tendency.survey.service.impl.SurveyServiceImpl;
 import com.archiservice.user.domain.User;
 import com.archiservice.user.repository.UserRepository;
 

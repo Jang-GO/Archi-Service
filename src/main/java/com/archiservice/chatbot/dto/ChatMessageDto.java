@@ -33,4 +33,15 @@ public class ChatMessageDto {
         .timestamp(chat.getCreatedAt())
         .build();
   }
+
+  public static ChatMessageDto infoMessage(Long userId, String content){
+    return ChatMessageDto.builder()
+        .messageId(null)
+        .userId(userId)
+        .content(content)
+        .type(MessageType.INFO)
+        .sender(Sender.BOT)
+        .timestamp(LocalDateTime.now())
+        .build();
+  }
 }

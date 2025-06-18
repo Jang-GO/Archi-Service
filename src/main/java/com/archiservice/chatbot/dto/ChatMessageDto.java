@@ -28,6 +28,8 @@ public class ChatMessageDto {
   private String content;
   @JsonAlias({"message_type", "type"})
   private MessageType type;
+  @JsonAlias({"mentioned_plans"})
+  private String mentionedPlans;
   private Sender sender;
   private LocalDateTime timestamp;
 
@@ -42,3 +44,5 @@ public class ChatMessageDto {
         .build();
   }
 }
+
+//content

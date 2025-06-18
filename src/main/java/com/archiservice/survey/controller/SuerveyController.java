@@ -13,6 +13,7 @@ import com.archiservice.common.security.CustomUser;
 import com.archiservice.survey.dto.response.QuestionResponseDto;
 import com.archiservice.survey.service.SurveyService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
@@ -35,9 +36,10 @@ public class SuerveyController {
 	@PostMapping("/save")
 	public ResponseEntity<ApiResponse<String>> saveResult(
 			@AuthenticationPrincipal CustomUser customUser,
-			HttpSession session){
+			HttpSession session,
+			HttpServletResponse response){
 		Long userId = customUser.getId();
-		return ResponseEntity.ok(surveyService.saveResult(userId, session));
+		return ResponseEntity.ok(surveyService.saveResult(userId, session, response));
 	}
 	
 	@GetMapping("/previous")

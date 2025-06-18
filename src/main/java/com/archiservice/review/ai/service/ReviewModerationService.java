@@ -28,18 +28,18 @@ public class ReviewModerationService {
     private final ReviewAnalysisService analysisService;
 
     public ModerationResult moderateAllReviews() {
-        log.info("=== 전체 리뷰 자동 삭제 작업 시작 ===");
+        log.info("=== 미모더레이션 리뷰 자동 조정 작업 시작 ===");
 
         long startTime = System.currentTimeMillis();
 
-        ModerationResult planResult = moderatePlanReviews();
-        ModerationResult vasResult = moderateVasReviews();
-        ModerationResult couponResult = moderateCouponReviews();
+        ModerationResult planResult = moderateUnmoderatedPlanReviews();
+        ModerationResult vasResult = moderateUnmoderatedVasReviews();
+        ModerationResult couponResult = moderateUnmoderatedCouponReviews();
 
         ModerationResult totalResult = combineModerationResults(
                 planResult, vasResult, couponResult, startTime);
 
-        log.info("=== 전체 리뷰 자동 삭제 작업 완료 ===");
+        log.info("=== 미모더레이션 리뷰 자동 조정 작업 완료 ===");
         log.info("총 처리된 리뷰: {}, 삭제된 리뷰: {}, 소요시간: {}ms",
                 totalResult.getTotalProcessed(),
                 totalResult.getDeletedCount(),
@@ -48,43 +48,43 @@ public class ReviewModerationService {
         return totalResult;
     }
 
-    public ModerationResult moderatePlanReviews() {
-        log.info("=== 요금제 리뷰 모더레이션 시작 ===");
+    public ModerationResult moderateUnmoderatedPlanReviews() {
+        log.info("=== 미모더레이션 요금제 리뷰 처리 시작 ===");
 
-        List<PlanReview> allReviews = planReviewRepository.findAll();
-        log.info("분석 대상 요금제 리뷰 수: {}", allReviews.size());
+        List<PlanReview> unmoderatedReviews = planReviewRepository.findByIsModeratedFalse();
+        log.info("모더레이션 대상 요금제 리뷰 수: {}", unmoderatedReviews.size());
 
-        if (allReviews.isEmpty()) {
+        if (unmoderatedReviews.isEmpty()) {
             return createEmptyResult("PLAN");
         }
 
-        return processAndDeleteReviews(allReviews, "PLAN");
+        return processAndDeleteReviews(unmoderatedReviews, "PLAN");
     }
 
-    public ModerationResult moderateVasReviews() {
-        log.info("=== 부가서비스 리뷰 모더레이션 시작 ===");
+    public ModerationResult moderateUnmoderatedVasReviews() {
+        log.info("=== 미모더레이션 부가서비스 리뷰 처리 시작 ===");
 
-        List<VasReview> allReviews = vasReviewRepository.findAll();
-        log.info("분석 대상 부가서비스 리뷰 수: {}", allReviews.size());
+        List<VasReview> unmoderatedReviews = vasReviewRepository.findByIsModeratedFalse();
+        log.info("모더레이션 대상 부가서비스 리뷰 수: {}", unmoderatedReviews.size());
 
-        if (allReviews.isEmpty()) {
+        if (unmoderatedReviews.isEmpty()) {
             return createEmptyResult("VAS");
         }
 
-        return processAndDeleteReviews(allReviews, "VAS");
+        return processAndDeleteReviews(unmoderatedReviews, "VAS");
     }
 
-    public ModerationResult moderateCouponReviews() {
-        log.info("=== 쿠폰 리뷰 모더레이션 시작 ===");
+    public ModerationResult moderateUnmoderatedCouponReviews() {
+        log.info("=== 미모더레이션 쿠폰 리뷰 처리 시작 ===");
 
-        List<CouponReview> allReviews = couponReviewRepository.findAll();
-        log.info("분석 대상 쿠폰 리뷰 수: {}", allReviews.size());
+        List<CouponReview> unmoderatedReviews = couponReviewRepository.findByIsModeratedFalse();
+        log.info("모더레이션 대상 쿠폰 리뷰 수: {}", unmoderatedReviews.size());
 
-        if (allReviews.isEmpty()) {
+        if (unmoderatedReviews.isEmpty()) {
             return createEmptyResult("COUPON");
         }
 
-        return processAndDeleteReviews(allReviews, "COUPON");
+        return processAndDeleteReviews(unmoderatedReviews, "COUPON");
     }
 
     private <T> ModerationResult processAndDeleteReviews(List<T> reviews, String reviewType) {
@@ -97,7 +97,7 @@ public class ReviewModerationService {
         List<ReviewAnalysisResult> analysisResults =
                 analysisService.analyzeBatchReviews(reviewContents);
 
-        int deletedCount = deleteViolatingReviews(reviews, analysisResults, reviewType);
+        int deletedCount = processReviewsWithModerationStatus(reviews, analysisResults, reviewType);
 
         long processingTime = System.currentTimeMillis() - startTime;
 
@@ -106,16 +106,18 @@ public class ReviewModerationService {
                 .deletedCount(deletedCount)
                 .errorCount(0)
                 .processingTimeMs(processingTime)
+                .reviewType(reviewType)
                 .build();
     }
 
-    private <T> int deleteViolatingReviews(
+    private <T> int processReviewsWithModerationStatus(
             List<T> reviews,
             List<ReviewAnalysisResult> results,
             String reviewType) {
 
         int deletedCount = 0;
         List<T> reviewsToDelete = new ArrayList<>();
+        List<T> reviewsToKeep = new ArrayList<>();
 
         for (int i = 0; i < Math.min(reviews.size(), results.size()); i++) {
             T review = reviews.get(i);
@@ -128,15 +130,20 @@ public class ReviewModerationService {
                 log.info("{} 리뷰 삭제 예정 - ID: {}, 사유: {}, 확신도: {:.2f}",
                         reviewType, extractId(review), result.getReason(), result.getConfidenceScore());
             } else {
+                reviewsToKeep.add(review);
                 log.debug("{} 리뷰 유지 - ID: {}, 확신도: {:.2f}",
                         reviewType, extractId(review), result.getConfidenceScore());
             }
         }
 
-        // 실제 삭제 실행
         if (!reviewsToDelete.isEmpty()) {
             deleteReviewsByType(reviewsToDelete, reviewType);
             log.info("{} 타입 리뷰 {}개 삭제 완료", reviewType, reviewsToDelete.size());
+        }
+
+        if (!reviewsToKeep.isEmpty()) {
+            markReviewsAsModerated(reviewsToKeep, reviewType);
+            log.info("{} 타입 리뷰 {}개 모더레이션 완료", reviewType, reviewsToKeep.size());
         }
 
         return deletedCount;
@@ -155,6 +162,26 @@ public class ReviewModerationService {
             case "COUPON" -> {
                 List<CouponReview> couponReviews = (List<CouponReview>) reviewsToDelete;
                 couponReviewRepository.deleteAll(couponReviews);
+            }
+        }
+    }
+
+    private <T> void markReviewsAsModerated(List<T> reviews, String reviewType) {
+        switch (reviewType) {
+            case "PLAN" -> {
+                List<PlanReview> planReviews = (List<PlanReview>) reviews;
+                planReviews.forEach(PlanReview::markAsModerated);
+                planReviewRepository.saveAll(planReviews);
+            }
+            case "VAS" -> {
+                List<VasReview> vasReviews = (List<VasReview>) reviews;
+                vasReviews.forEach(VasReview::markAsModerated);
+                vasReviewRepository.saveAll(vasReviews);
+            }
+            case "COUPON" -> {
+                List<CouponReview> couponReviews = (List<CouponReview>) reviews;
+                couponReviews.forEach(CouponReview::markAsModerated);
+                couponReviewRepository.saveAll(couponReviews);
             }
         }
     }
@@ -200,6 +227,7 @@ public class ReviewModerationService {
                         vasResult.getErrorCount() +
                         couponResult.getErrorCount())
                 .processingTimeMs(totalProcessingTime)
+                .reviewType("ALL")
                 .build();
     }
 
@@ -210,6 +238,7 @@ public class ReviewModerationService {
                 .deletedCount(0)
                 .errorCount(0)
                 .processingTimeMs(0L)
+                .reviewType(reviewType)
                 .build();
     }
 }

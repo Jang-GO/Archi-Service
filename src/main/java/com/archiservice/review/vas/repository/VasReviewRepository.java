@@ -1,5 +1,6 @@
 package com.archiservice.review.vas.repository;
 
+import com.archiservice.review.coupon.domain.CouponReview;
 import com.archiservice.review.vas.domain.VasReview;
 import com.archiservice.product.vas.domain.Vas;
 import com.archiservice.user.domain.User;
@@ -17,6 +18,8 @@ public interface VasReviewRepository extends JpaRepository<VasReview, Long> {
     Page<VasReview> findByVasIdWithUser(@Param("vasId") Long vasId, Pageable pageable);
 
     boolean existsByUserAndVas(User user, Vas vas);
+
+    List<VasReview> findByIsModeratedFalse();
 
     int countVasReviewByVas(Vas vas);
 

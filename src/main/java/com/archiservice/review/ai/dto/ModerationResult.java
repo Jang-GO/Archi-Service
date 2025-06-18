@@ -14,6 +14,7 @@ public class ModerationResult {
     private int deletedCount;
     private int errorCount;
     private long processingTimeMs;
+    private String reviewType; // 추가된 필드
 
     public double getDeletionRate() {
         return totalProcessed > 0 ? (double) deletedCount / totalProcessed * 100 : 0.0;

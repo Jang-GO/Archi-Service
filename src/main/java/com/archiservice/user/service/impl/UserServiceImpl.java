@@ -20,8 +20,6 @@ import com.archiservice.user.dto.response.TendencyResponseDto;
 import com.archiservice.user.repository.UserRepository;
 import com.archiservice.user.service.UserService;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -32,7 +30,8 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final TagMetaService tagMetaService;
     private final JwtUtil jwtUtil;
-    private final RefreshTokenService refreshTokenService;
+    private final TagMetaService metaService;
+    
 
     @Override
     public ProfileResponseDto getUserProfile(CustomUser customUser) {
@@ -79,23 +78,27 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public void updateTendency(TendencyUpdateRequestDto request, CustomUser customUser, HttpServletResponse response) {
+	public TendencyResponseDto updateTendency(TendencyUpdateRequestDto request, CustomUser customUser) {
 		User user = userRepository.findById(customUser.getId())
 				.orElseThrow(() -> new UserNotFoundException("올바른 사용자 정보를 가져오지 못했습니다."));
 		
-		Long tagCode = request.getNewTagCode();
+		Long tagCode;
+		
+		if (request.getTagCode() != null) {
+	        tagCode = request.getTagCode();
+	    } else if (request.getTagCodes() != null && !request.getTagCodes().isEmpty()) {
+	        tagCode = tagMetaService.calculateTagCodeFromDescriptions(request.getTagCodes());
+	    } else {
+	        throw new IllegalArgumentException("태그 정보가 유효하지 않습니다.");
+	    }
+		
 		user.setTagCode(tagCode);
 		userRepository.save(user);
 		
 		String accessToken = jwtUtil.generateAccessToken(customUser);
-        String refreshToken = jwtUtil.generateRefreshToken(customUser);
-        
-        refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
-
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
+		return TendencyResponseDto.builder()
+								.token(accessToken)
+								.build();
 	}
-    
     
 }

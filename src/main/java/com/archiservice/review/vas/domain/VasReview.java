@@ -51,6 +51,7 @@ public class VasReview extends TimeStamp {
     public void updateReview(Integer score, String content) {
         this.score = score;
         this.content = content;
+        this.isModerated=false;
     }
 
     public void validateOwner(Long userId) {

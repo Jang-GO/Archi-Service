@@ -27,27 +27,6 @@ public class ReviewModerationService {
     private final CouponReviewRepository couponReviewRepository;
     private final ReviewAnalysisService analysisService;
 
-    public ModerationResult moderateAllReviews() {
-        log.info("=== 미모더레이션 리뷰 자동 조정 작업 시작 ===");
-
-        long startTime = System.currentTimeMillis();
-
-        ModerationResult planResult = moderateUnmoderatedPlanReviews();
-        ModerationResult vasResult = moderateUnmoderatedVasReviews();
-        ModerationResult couponResult = moderateUnmoderatedCouponReviews();
-
-        ModerationResult totalResult = combineModerationResults(
-                planResult, vasResult, couponResult, startTime);
-
-        log.info("=== 미모더레이션 리뷰 자동 조정 작업 완료 ===");
-        log.info("총 처리된 리뷰: {}, 삭제된 리뷰: {}, 소요시간: {}ms",
-                totalResult.getTotalProcessed(),
-                totalResult.getDeletedCount(),
-                totalResult.getProcessingTimeMs());
-
-        return totalResult;
-    }
-
     public ModerationResult moderateUnmoderatedPlanReviews() {
         log.info("=== 미모더레이션 요금제 리뷰 처리 시작 ===");
 
@@ -206,29 +185,6 @@ public class ReviewModerationService {
             return couponReview.getCouponReviewId();
         }
         throw new IllegalArgumentException("지원하지 않는 리뷰 타입입니다.");
-    }
-
-    private ModerationResult combineModerationResults(
-            ModerationResult planResult,
-            ModerationResult vasResult,
-            ModerationResult couponResult,
-            long startTime) {
-
-        long totalProcessingTime = System.currentTimeMillis() - startTime;
-
-        return ModerationResult.builder()
-                .totalProcessed(planResult.getTotalProcessed() +
-                        vasResult.getTotalProcessed() +
-                        couponResult.getTotalProcessed())
-                .deletedCount(planResult.getDeletedCount() +
-                        vasResult.getDeletedCount() +
-                        couponResult.getDeletedCount())
-                .errorCount(planResult.getErrorCount() +
-                        vasResult.getErrorCount() +
-                        couponResult.getErrorCount())
-                .processingTimeMs(totalProcessingTime)
-                .reviewType("ALL")
-                .build();
     }
 
     private ModerationResult createEmptyResult(String reviewType) {

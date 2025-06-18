@@ -49,7 +49,7 @@ public class SurveyServiceImpl implements SurveyService{
 	    if (history == null) {
 	        history = new ArrayList<>();
 	    }
-	    if (fromPrevious && nextQuestionId != null) {
+	    if (!fromPrevious && nextQuestionId != null) {
 	        history.add(new QuestionHistoryDto(nextQuestionId, tagCode));
 	    }
 	    session.setAttribute("questionHistory", history);
@@ -98,23 +98,19 @@ public class SurveyServiceImpl implements SurveyService{
 	@Override
 	public ApiResponse<QuestionResponseDto> getPreviousQuestion(HttpSession session) {
 	    List<QuestionHistoryDto> history = (List<QuestionHistoryDto>) session.getAttribute("questionHistory");
-	    System.out.println("%%%%%%%%%%%%%%%%%" + history.size() + "%%%%%%%%%%%%%%%%%");
 	    if (history == null || history.size() < 2) {
 	        throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "이전 질문이 없습니다.");
 	    }
 
-	    // 현재 질문 제거
 	    history.remove(history.size() - 1);
 	    QuestionHistoryDto previous = history.get(history.size() - 1);
 	    session.setAttribute("questionHistory", history);
 
-	    // tagCodeSum 롤백
 	    Long tagCodeSum = (Long) session.getAttribute("tagCodeSum");
 	    if (tagCodeSum != null && previous.getTagCode() != null) {
 	        session.setAttribute("tagCodeSum", tagCodeSum - previous.getTagCode());
 	    }
 
-	    System.out.println("%%%%%%%%%%%%%%%%%" + history.size() + "%%%%%%%%%%%%%%%%%");
 	    return getQuestion(previous.getQuestionId(), null, true, session);
 	}
 	

@@ -81,7 +81,7 @@ public class SurveyServiceImpl implements SurveyService{
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("userId", userId);
 		claims.put("tagCode", tagCode);
-		String tagCodeAccessToken = jwtUtil.generateCustomToken(claims, user.getEmail());
+		String tagCodeAccessToken = jwtUtil.generateCustomToken(claims, user.getUserId());
 		
 		session.removeAttribute("tagCodeSum");
 		return ApiResponse.success(tagCodeAccessToken);

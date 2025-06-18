@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PlanReviewRepository extends JpaRepository<PlanReview, Long> {
+
     @Query("SELECT pr FROM PlanReview pr JOIN FETCH pr.user WHERE pr.plan.planId = :planId ORDER BY pr.createdAt DESC")
     Page<PlanReview> findByPlanIdWithUser(@Param("planId") Long planId, Pageable pageable);
 

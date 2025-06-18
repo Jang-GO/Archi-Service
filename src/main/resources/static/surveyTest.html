@@ -3,79 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <style>
+    * {
+        box-sizing: border-box;
+    }
+
     body {
         background-color: #f0f2f5;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        margin: 0;
     }
-    #SurveyForm {
-        background: #fff;
-        padding: 30px 40px;
+
+    #LoginDiv, #SurveyForm {
+        background: #ffffff;
+        padding: 40px 30px;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
         width: 100%;
-        max-width: 500px;
+        max-width: 480px;
+        text-align: center;
     }
-    #startSurveyBtn, #submitResultBtn {
-        display: block;
-        margin: 0 auto 20px;
-        padding: 10px 20px;
-        font-size: 1.1rem;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-    #startSurveyBtn:hover, #submitResultBtn:hover {
-        background-color: #0056b3;
-    }
-    #questionBox {
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 20px;
+
+    h2 {
+        margin-bottom: 30px;
         color: #333;
     }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="file"] {
+        width: 100%;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    button {
+        padding: 12px 24px;
+        font-size: 16px;
+        margin: 6px;
+        border: none;
+        border-radius: 8px;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    #startSurveyBtn,
+    #startImageBtn,
+    #submitResultBtn {
+        width: 100%;
+    }
+
+    #questionBox {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin: 20px 0 10px;
+    }
+
     #optionBox label {
         background: #f9f9f9;
-        padding: 10px;
+        padding: 12px;
         border: 1px solid #ddd;
         border-radius: 8px;
         display: block;
         margin-bottom: 10px;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: background-color 0.2s;
+        text-align: left;
     }
+
     #optionBox label:hover {
-        background: #f1f1f1;
+        background-color: #f0f0f0;
     }
+
     #optionBox input[type="radio"] {
         margin-right: 10px;
     }
+
     #navigationButtons {
         display: flex;
         justify-content: space-between;
         margin-top: 20px;
     }
+
     #navigationButtons button {
-        padding: 10px 20px;
-        font-size: 1rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
+        flex: 1;
+        margin: 0 5px;
         background-color: #28a745;
-        color: white;
-        transition: background 0.2s;
     }
-    #navigationButtons button#prevQuestionBtn {
+
+    #navigationButtons #prevQuestionBtn {
         background-color: #6c757d;
     }
+
     #navigationButtons button:hover {
-        opacity: 0.9;
+        opacity: 0.95;
+    }
+
+    #resultBox {
+        margin-top: 20px;
+    }
+
+    #imageSubmitBox {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+    #imageSubmitBox input[type="file"] {
+        margin-bottom: 10px;
+    }
+
+    @media (max-width: 500px) {
+        #LoginDiv, #SurveyForm {
+            padding: 30px 20px;
+        }
+
+        button {
+            font-size: 14px;
+            padding: 10px 20px;
+        }
     }
 </style>
 <title>survey</title>
@@ -96,6 +155,7 @@
 	
 	<div id="SurveyForm" style="display:none;">
 		<button type="button" id="startSurveyBtn">설문 시작</button>
+		<button type="button" id="startImageBtn">이미지 제출</button>
 		<div id="questionBox"></div>
 		<div id="optionBox"></div>
 		<div id="navigationButtons" style="display:none;">
@@ -104,8 +164,9 @@
 		</div>
 		<div id="resultBox" style="display:none;">
 	        <button id="submitResultBtn">설문결과등록하기</button>
-    </div>
-</div>
+    	</div>
+    	<div id="imageSubmitBox" style="display:none;"></div>
+	</div>
 	
 	<script>
         const form = document.getElementById('loginForm');
@@ -139,12 +200,13 @@
         
         
         document.getElementById('startSurveyBtn').addEventListener('click', () => loadQuestion(1));
+        document.getElementById('startImageBtn').addEventListener('click', () => loadImageSubmit());
         
         let currentOptions = [];
 
         async function loadQuestion(nextQuestionId, tagCode = null) {
         	document.getElementById('startSurveyBtn').style.display = "none";
-        	document.getElementById('navigationButtons').style.display = "none";
+        	document.getElementById('startImageBtn').style.display = "none";
         	
         	let url = '/surveys/questions';
         	if (nextQuestionId !== null) {
@@ -239,6 +301,63 @@
         });
 
         
+        async function loadImageSubmit(){
+        	document.getElementById('startSurveyBtn').style.display = "none";
+        	document.getElementById('startImageBtn').style.display = "none";
+        	
+        	const imageBox = document.getElementById('imageSubmitBox');
+            imageBox.style.display = "block";
+            imageBox.innerHTML = `
+                <input type="file" id="imageInput" accept="image/*" />
+                <button onclick="submitImage()">제출</button>
+            `;
+        }
+        
+        function submitImage() {
+            const allowedScreenshotExtensions = ['png', 'jpg', 'jpeg', 'webp'];
+            const input = document.getElementById('imageInput');
+            const file = input.files[0];
+
+            if (!file) {
+                alert("이미지를 선택해주세요.");
+                return;
+            }
+
+            const fileSizeLimit = 5 * 1024 * 1024; // 5MB
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedScreenshotExtensions.includes(fileExtension)) {
+                alert("허용되지 않은 파일 형식입니다.\n허용 확장자: png, jpg, jpeg, webp");
+                return;
+            }
+
+            if (file.size > fileSizeLimit) {
+                alert("파일 크기가 5MB를 초과합니다.");
+                return;
+            }
+            
+         	// 로딩 표시
+            const imageBox = document.getElementById('imageSubmitBox');
+            imageBox.innerHTML += `<p id="loadingMessage" style="color: gray;">이미지 분석 중입니다...</p>`;
+
+            // 2초 후 실행
+            setTimeout(() => {
+                document.getElementById('loadingMessage').remove();
+
+                let tagCodes = getTagCodes();  // 임의 함수, 성향 코드 반환
+                alert("당신의 성향 태그: \n\n" + tagCodes.join(', '));
+
+                imageBox.style.display = "none";
+                document.getElementById('resultBox').style.display = 'block';
+            }, 2000);
+            
+        }
+
+        
+        function getTagCodes(){
+        	// 태그 추출 api 호출 함수
+        	return ["데이터 사용량이 많은 사용자", "통화 사용량이 적은 사용자", "5G 사용자", "생활", "영어", "외식", "웹툰", "SNS"];
+        }
         
         
         

@@ -75,7 +75,7 @@ public class SurveyServiceImpl implements SurveyService{
 
 	
 	@Override
-	public ApiResponse<String> saveResult(Long userId, HttpSession session, HttpServletResponse response) {
+	public ApiResponse<String> saveResult(Long userId, HttpSession session) {
 		User user = userRepository.findById(userId)
 		        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 		
@@ -91,13 +91,6 @@ public class SurveyServiceImpl implements SurveyService{
 		// JWT
 		CustomUser customUser = new CustomUser(user);
 		String accessToken = jwtUtil.generateAccessToken(customUser);
-		String refreshToken = jwtUtil.generateRefreshToken(customUser);
-		
-		refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
-
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
 		
 		session.removeAttribute("tagCodeSum");
 		session.removeAttribute("questionHistory");

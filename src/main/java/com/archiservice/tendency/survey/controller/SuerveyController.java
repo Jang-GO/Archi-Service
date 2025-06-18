@@ -36,10 +36,9 @@ public class SuerveyController {
 	@PostMapping("/save")
 	public ResponseEntity<ApiResponse<String>> saveResult(
 			@AuthenticationPrincipal CustomUser customUser,
-			HttpSession session,
-			HttpServletResponse response){
+			HttpSession session){
 		Long userId = customUser.getId();
-		return ResponseEntity.ok(surveyService.saveResult(userId, session, response));
+		return ResponseEntity.ok(surveyService.saveResult(userId, session));
 	}
 	
 	@GetMapping("/previous")

@@ -13,7 +13,11 @@ import com.archiservice.product.plan.repository.PlanRepository;
 import com.archiservice.product.vas.domain.Vas;
 import com.archiservice.product.vas.dto.response.VasDetailResponseDto;
 import com.archiservice.product.vas.repository.VasRepository;
-import com.archiservice.recommend.dto.response.*;
+import com.archiservice.recommend.dto.response.RecommendCouponResponseDto;
+import com.archiservice.recommend.dto.response.RecommendPlanResponseDto;
+import com.archiservice.recommend.dto.response.RecommendResponseDto;
+import com.archiservice.recommend.dto.response.RecommendVasResponseDto;
+import com.archiservice.recommend.dto.response.ScoreResponseDto;
 import com.archiservice.recommend.service.RecommendService;
 import com.archiservice.review.coupon.repository.CouponReviewRepository;
 import com.archiservice.review.coupon.service.CouponReviewService;
@@ -21,28 +25,14 @@ import com.archiservice.review.plan.repository.PlanReviewRepository;
 import com.archiservice.review.plan.service.PlanReviewService;
 import com.archiservice.review.vas.repository.VasReviewRepository;
 import com.archiservice.review.vas.service.VasReviewService;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -256,108 +246,4 @@ public class RecommendServiceImpl implements RecommendService {
             return bayesScore;
         }
     }
-
-    @Override
-    public String uploadImage(MultipartFile file , String uploadDir) {
-        try {
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path filePath = Paths.get(uploadDir + fileName);
-            Files.write(filePath, file.getBytes());
-
-            String imageUrl = "http://localhost:8080/images/" + fileName;
-            return imageUrl;
-        } catch (IOException e) {
-            throw new RuntimeException("이미지 업로드 실패", e);
-        }
-    }
-
-    @Override
-    public String analyzeImage(String imageUrl) {
-
-        // ai 서버 호출 및 결과 반환
-
-        String fileName = extractFileNameFromUrl(imageUrl);
-        deleteFile(fileName);
-
-        String result = "응답 결과";
-        return result;
-    }
-
-    private String extractFileNameFromUrl(String fileUrl) {
-        String regex = ".*/([^/?]+)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(fileUrl);
-
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
-    private void deleteFile(String fileName) {
-        // TODO : 디렉터리 경로 수정
-        String uploadDir = "src/main/resources/images/";
-        Path filePath = Paths.get(uploadDir + fileName);
-        try {
-            Files.deleteIfExists(filePath);
-        } catch (IOException e) {
-            // TODO: 로그 처리
-        }
-    }
-
-    @Override
-    public String analyzeImage(MultipartFile file) {
-        try {
-            // 파일을 Stream으로 즉시 LLM 서버에 전달
-            InputStream inputStream = file.getInputStream();
-
-            String result = callAiServer(inputStream);
-
-            return result;
-
-        } catch (Exception e) {
-            throw new RuntimeException("AI 분석 실패", e);
-        }
-    }
-
-    private String callAiServer(InputStream inputStream) {
-        try {
-            // 1헤더: multipart/form-data
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            //  바디: file 파트에 InputStreamResource 사용
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new InputStreamResource(inputStream) {
-                @Override
-                public String getFilename() {
-                    return "temp.jpg"; // AI 서버 쪽에서 UploadFile로 받을 때 이름 필요
-                }
-            });
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-            // 3요청: AI 서버의 /analyze-image 엔드포인트 호출
-            String aiServerUrl = "http://archi-ai:8000/analyze-image"; // docker-compose service name 사용 예시
-
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    aiServerUrl,
-                    requestEntity,
-                    String.class
-            );
-
-            // 4결과 반환
-            return response.getBody();
-
-        } catch (Exception e) {
-            throw new RuntimeException("AI 서버 호출 실패", e);
-        }
-    }
-
-
 }

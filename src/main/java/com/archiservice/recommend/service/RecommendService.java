@@ -15,11 +15,4 @@ public interface RecommendService {
     RecommendVasResponseDto recommendVas(CustomUser user);
     RecommendCouponResponseDto recommendCoupon(CustomUser user);
 
-    // 이미지 업로드
-    String uploadImage(MultipartFile file , String uploadDir);
-    // 이미지 분석
-    String analyzeImage(String imageUrl);
-
-    //
-    String analyzeImage(MultipartFile file);
 }

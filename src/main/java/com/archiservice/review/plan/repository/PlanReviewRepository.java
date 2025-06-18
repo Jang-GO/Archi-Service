@@ -22,11 +22,6 @@ public interface PlanReviewRepository extends JpaRepository<PlanReview, Long> {
 
     List<PlanReview> findByIsModeratedFalse();
 
-    int countPlanReviewByPlan(Plan plan);
-
-    @Query("SELECT AVG(r.score) FROM PlanReview r WHERE r.plan = :plan")
-    Double getAverageRatingByPlan(@Param("plan") Plan plan);
-
     @Query("SELECT AVG(r.score) FROM PlanReview r WHERE r.plan IS NOT NULL")
     Double findAverageRatingByPlanIsNotNull();
 

@@ -21,11 +21,6 @@ public interface VasReviewRepository extends JpaRepository<VasReview, Long> {
 
     List<VasReview> findByIsModeratedFalse();
 
-    int countVasReviewByVas(Vas vas);
-
-    @Query("SELECT AVG(r.score) FROM VasReview r WHERE r.vas = :vas")
-    Double getAverageRatingByVas(@Param("vas") Vas vas);
-
     @Query("SELECT AVG(r.score) FROM VasReview r WHERE r.vas IS NOT NULL")
     Double findAverageRatingByVasIsNotNull();
 

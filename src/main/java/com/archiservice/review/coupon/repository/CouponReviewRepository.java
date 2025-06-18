@@ -19,11 +19,6 @@ public interface CouponReviewRepository extends JpaRepository<CouponReview, Long
 
     boolean existsByUserAndCoupon(User user, Coupon coupon);
 
-    int countCouponReviewByCoupon(Coupon coupon);
-
-    @Query("SELECT AVG(r.score) FROM CouponReview r WHERE r.coupon = :coupon")
-    Double getAverageRatingByCoupon(@Param("coupon") Coupon coupon);
-
     @Query("SELECT AVG(r.score) FROM CouponReview r WHERE r.coupon IS NOT NULL")
     Double findAverageRatingByCouponIsNotNull();
 

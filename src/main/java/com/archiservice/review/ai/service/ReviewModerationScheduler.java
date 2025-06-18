@@ -24,7 +24,7 @@ public class ReviewModerationScheduler {
         this.taskExecutor = taskExecutor;
     }
 
-    @Scheduled(cron = "0 23 * * * *")
+    @Scheduled(cron = "0 0 2 * * *")
     @Async
     public void scheduledReviewDeletion() {
         log.info("=== 병렬 리뷰 삭제 작업 시작 ===");

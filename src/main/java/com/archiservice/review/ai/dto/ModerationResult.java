@@ -1,0 +1,22 @@
+package com.archiservice.review.ai.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ModerationResult {
+    private int totalProcessed;
+    private int deletedCount;
+    private int errorCount;
+    private long processingTimeMs;
+    private String reviewType; // 추가된 필드
+
+    public double getDeletionRate() {
+        return totalProcessed > 0 ? (double) deletedCount / totalProcessed * 100 : 0.0;
+    }
+}

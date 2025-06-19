@@ -12,5 +12,5 @@ public interface UserService {
     ProfileResponseDto getUserProfile(CustomUser user);
     void updatePassword(PasswordUpdateRequestDto request, CustomUser user);
     List<TendencyResponseDto> getUserTendency(CustomUser user);
-    TendencyResponseDto updateTendency(TendencyUpdateRequestDto request, CustomUser user);
+    String updateTendency(TendencyUpdateRequestDto request, CustomUser user);
 }

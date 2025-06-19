@@ -47,7 +47,7 @@ public class UserController {
     }
     
     @GetMapping("/tendency/update")
-    public ResponseEntity<ApiResponse<TendencyResponseDto>> updateUserTendency(@Valid @RequestBody TendencyUpdateRequestDto request,@AuthenticationPrincipal CustomUser user) {
+    public ResponseEntity<ApiResponse<String>> updateUserTendency(@Valid @RequestBody TendencyUpdateRequestDto request, @AuthenticationPrincipal CustomUser user) {
         return ResponseEntity.ok(ApiResponse.success(userService.updateTendency(request, user)));
     }
 

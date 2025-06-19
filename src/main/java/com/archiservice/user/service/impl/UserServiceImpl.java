@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
 	@Override
-	public TendencyResponseDto updateTendency(TendencyUpdateRequestDto request, CustomUser customUser) {
+	public String updateTendency(TendencyUpdateRequestDto request, CustomUser customUser) {
 		User user = userRepository.findById(customUser.getId())
 				.orElseThrow(() -> new UserNotFoundException("올바른 사용자 정보를 가져오지 못했습니다."));
 		
@@ -96,9 +96,7 @@ public class UserServiceImpl implements UserService {
 		userRepository.save(user);
 		
 		String accessToken = jwtUtil.generateAccessToken(customUser);
-		return TendencyResponseDto.builder()
-								.token(accessToken)
-								.build();
+		return accessToken;
 	}
     
 }

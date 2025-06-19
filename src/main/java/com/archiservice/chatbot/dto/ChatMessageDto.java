@@ -69,11 +69,10 @@ public class ChatMessageDto {
             .build();
   }
 
-  public static ChatMessageDto ofTags(Long userId, List<String> tags) {
-    String tagContent = tags.toString();
+  public static ChatMessageDto ofTags(Long userId, String tags) {
     return ChatMessageDto.builder()
             .userId(userId)
-            .content(tagContent)
+            .content(tags)
             .type(MessageType.IMAGE_ANALYSIS)
             .sender(Sender.BOT)
             .timestamp(LocalDateTime.now())

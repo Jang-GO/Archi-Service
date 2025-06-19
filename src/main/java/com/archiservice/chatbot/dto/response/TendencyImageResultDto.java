@@ -14,7 +14,7 @@ public class TendencyImageResultDto {
   @JsonProperty("user_id")
   private String user_id;
   private String summary;
-  private List<String> tags;
+  private String tags;
 
   @JsonProperty("message_type")
   private MessageType message_type;

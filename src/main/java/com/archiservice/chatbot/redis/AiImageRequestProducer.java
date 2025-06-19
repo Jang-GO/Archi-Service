@@ -22,14 +22,22 @@ public class AiImageRequestProducer {
   private final StreamOperations<String, Object, Object> streamOperations;
 
   public void sendToAI(TendencyImageRequestDto dto) {
-    try{
-      String json = objectMapper.writeValueAsString(dto);
-      Map<String, Object> message = Map.of("data", json);
+    try {
+      String payloadJson = objectMapper.writeValueAsString(dto.getPayload());
+      String metadataJson = objectMapper.writeValueAsString(dto.getMetadata());
+
+      Map<String, Object> message = Map.of(
+              "payload", dto.getPayload(),
+              "metadata", dto.getMetadata()
+      );
 
       streamOperations.add(STREAM_KEY, message);
 
-    }catch (JsonProcessingException e) {
+      System.out.println("[Producer] ✅ Stream push: " + message);
+
+    } catch (JsonProcessingException e) {
       throw new AiMessageSendFailedException("AI 이미지 요청 직렬화 실패");
     }
   }
 }
+

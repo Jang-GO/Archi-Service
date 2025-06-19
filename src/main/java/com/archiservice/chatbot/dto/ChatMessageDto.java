@@ -1,8 +1,13 @@
 package com.archiservice.chatbot.dto;
 
+import java.time.LocalDateTime;
+
 import com.archiservice.chatbot.domain.Chat;
 import com.archiservice.chatbot.dto.type.MessageType;
 import com.archiservice.chatbot.dto.type.Sender;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;

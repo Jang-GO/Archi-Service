@@ -1,5 +1,6 @@
 package com.archiservice.badword;
 
+import com.archiservice.badword.service.BadWordValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

@@ -58,7 +58,7 @@ public class ChatServiceImpl implements ChatService {
         ChatMessageDto response = ChatMessageDto.fromChat(savedChat);
 
         String key = "chat:user:" + authInfo.getUserId();
-        chatMessageRedisTemplate.opsForList().leftPush(key, response);
+        chatMessageRedisTemplate.opsForList().rightPush(key, response);
         chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
 
         messagingTemplate.convertAndSendToUser(
@@ -91,7 +91,7 @@ public class ChatServiceImpl implements ChatService {
         }
 
         // fallback: DB 조회 시도 (최신순 정렬)
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
         Page<Chat> chatPage = chatRepository.findByUser_UserId(userId, pageable);
 
         return chatPage.stream()

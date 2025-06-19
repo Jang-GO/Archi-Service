@@ -4,6 +4,7 @@ import com.archiservice.chatbot.dto.ChatMessageDto;
 import com.archiservice.chatbot.dto.request.TendencyImageRequestDto;
 import com.archiservice.chatbot.dto.response.TendencyImageResultDto;
 import com.archiservice.chatbot.redis.AiImageRequestProducer;
+import com.archiservice.chatbot.repository.ChatRepository;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
@@ -25,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class TendencyImageService {
   private final SimpMessagingTemplate messagingTemplate;
   private final AiImageRequestProducer aiImageRequestProducer;
-
+  private ChatRepository chatRepository;
 
   public void sendImageForAnalysis(CustomUser customUser, MultipartFile image) {
     // Id 뽑아내기
@@ -65,11 +66,11 @@ public class TendencyImageService {
         "사진 분석이 시작되었습니다"
     );
 
-    messagingTemplate.convertAndSendToUser(
-        String.valueOf(userId),
-        "/queue/chat",
-        infoMessage
-    );
+//    messagingTemplate.convertAndSendToUser(
+//        String.valueOf(userId),
+//        "/queue/chat",
+//        infoMessage
+//    );
   }
 
   // TODO: 메시지 2개 생성 (summary + tags)

@@ -13,6 +13,7 @@ import com.archiservice.product.plan.repository.PlanRepository;
 import com.archiservice.product.vas.domain.Vas;
 import com.archiservice.product.vas.dto.response.VasDetailResponseDto;
 import com.archiservice.product.vas.repository.VasRepository;
+import com.archiservice.recommend.dto.request.RecommendRequestDto;
 import com.archiservice.recommend.dto.response.*;
 import com.archiservice.recommend.service.RecommendService;
 import com.archiservice.review.coupon.repository.CouponReviewRepository;
@@ -21,7 +22,12 @@ import com.archiservice.review.plan.repository.PlanReviewRepository;
 import com.archiservice.review.plan.service.PlanReviewService;
 import com.archiservice.review.vas.repository.VasReviewRepository;
 import com.archiservice.review.vas.service.VasReviewService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.template.st.StTemplateRenderer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +37,9 @@ import java.util.*;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RecommendServiceImpl implements RecommendService {
+
+    @Qualifier("recommendChatClient")
+    private final ChatClient recommendChatClient;
 
     private final TagMetaService tagMetaService;
     private final PlanRepository planRepository;
@@ -48,18 +57,26 @@ public class RecommendServiceImpl implements RecommendService {
     private final CouponReviewService couponReviewService;
 
     @Override
-    public RecommendResponseDto recommend(CustomUser user) {
+    public RecommendResponseDto recommend (CustomUser user) {
+        return RecommendResponseDto.from(recommendPlan(user), recommendVas(user), recommendCoupon(user));
+    }
 
-        // 1. 요금제 추천
-        RecommendPlanResponseDto recommendedPlans = recommendPlan(user);
-        // 2. 부가서비스 추천 정렬
-        RecommendVasResponseDto recommendedVass = recommendVas(user);
-        // 3. 쿠폰 추천 정렬
-        RecommendCouponResponseDto recommendedCoupons = recommendCoupon(user);
+    @Override
+    public AIRecommendResponseDto evaluateRecommend(CustomUser user, RecommendRequestDto recommend) {
 
-        // TODO : 성향태그가 아무것도 겹치지않는 경우 예외 고려
-        return RecommendResponseDto.from( recommendedPlans, recommendedVass, recommendedCoupons );
+        List<String> tagList = tagMetaService.extractTagsFromCode(user.getTagCode());
 
+        return recommendChatClient.prompt()
+                .system(sp -> sp
+                        .param("tagList", tagList)
+                        .param("recommend", recommend)
+                )
+                .templateRenderer(StTemplateRenderer.builder()
+                        .startDelimiterToken('<')
+                        .endDelimiterToken('>')
+                        .build())
+                .call()
+                .entity(AIRecommendResponseDto.class);
     }
 
     @Override

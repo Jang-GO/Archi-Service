@@ -5,7 +5,9 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class PlanDetailResponseDto {
     private Long planId;

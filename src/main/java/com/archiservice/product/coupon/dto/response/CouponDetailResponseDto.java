@@ -1,12 +1,13 @@
 package com.archiservice.product.coupon.dto.response;
 
 import com.archiservice.product.coupon.domain.Coupon;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CouponDetailResponseDto {
     private Long couponId;

@@ -26,6 +26,104 @@ spring:
         format_sql: true
     show-sql: true # SQL 로그 출력 여부
 
+  ai:
+    openai:
+      chat:
+        options:
+          model: gpt-3.5-turbo
+          temperature: 0.3
+          max-tokens: 1000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoint:
+    prometheus:
+      enabled: true
 
 app:
   upload-dir: uploads/
+
+tag:
+  mainTags:
+    - IT
+    - OTT
+    - News
+    - Book
+    - Pet
+    - Delivery
+    - Photo
+    - Life
+    - Food
+    - Car
+    - Movie
+    - OnlineClass
+    - Webtoon
+    - Youtube
+    - Music
+    - Hobby
+    - Cafe
+    - Kids
+  subToMainMapping:
+    it: IT
+    #
+    ott: OTT
+    netflix: OTT
+    disney: OTT
+    tving: OTT
+    drama: OTT
+    #
+    news : News
+    economy: News
+    stock: News
+    #
+    ebook: Book
+    #
+    pet: Pet
+    #
+    delivery: Delivery
+    #
+    photo: Photo
+    #
+    living: Life
+    shopping: Life
+    store: Life
+    family: Life
+    friend: Life
+    date: Life
+    #
+    dining: Food
+    food: Food
+    #
+    car: Car
+    #
+    movie: Movie
+    #
+    onlineClass: OnlineClass
+    growth: OnlineClass
+    english: OnlineClass
+    chinese: OnlineClass
+    education: OnlineClass
+    #
+    webtoon: Webtoon
+    webnovel: Webtoon
+    #
+    youtube: Youtube
+    #
+    baseball: Hobby # 부가서비스에 인터파크 추가예정
+    soccer: Hobby
+    game: Hobby
+    #
+    coffee: Cafe
+    bread: Cafe
+    #
+    music: Music
+    kpop: Music
+    #
+    kids: Kids

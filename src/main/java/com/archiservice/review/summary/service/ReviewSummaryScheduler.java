@@ -17,7 +17,7 @@ public class ReviewSummaryScheduler {
         this.summaryService = summaryService;
     }
 
-    @Scheduled(cron = "0 55 * * * *")
+    @Scheduled(cron = "0 0 3 * * *",zone = "Asia/Seoul")
     public void scheduledReviewSummary() {
         log.info("=== 스케줄링된 리뷰 요약 작업 시작 ===");
 

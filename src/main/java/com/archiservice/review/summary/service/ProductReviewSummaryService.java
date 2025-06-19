@@ -106,7 +106,6 @@ public class ProductReviewSummaryService {
 
     private SummaryResult processReviewGroups(List<Object[]> reviewGroups, String reviewType) {
         int summarizedCount = 0;
-        int skippedCount = 0;
 
         for (Object[] group : reviewGroups) {
             Long productId = (Long) group[0];
@@ -117,7 +116,6 @@ public class ProductReviewSummaryService {
             }
 
             if (!hasReviewCountChanged(productId, reviewType, reviewCount.intValue())) {
-                skippedCount++;
                 log.debug("{} 상품 ID {} - 리뷰 변경 없음, 스킵", reviewType, productId);
                 continue;
             }

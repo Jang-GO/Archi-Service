@@ -77,6 +77,6 @@ public class ProductReviewSummary extends TimeStamp {
         this.lowRatingSummary = lowRatingSummary;
         this.lowRatingCount = lowRatingCount;
         this.mediumRatingCount = mediumRatingCount;
-        this.summaryDate = LocalDate.now(); // 업데이트 날짜 갱신
+        this.summaryDate = LocalDate.now();
     }
 }

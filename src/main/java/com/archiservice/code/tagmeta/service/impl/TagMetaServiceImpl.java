@@ -52,6 +52,20 @@ public class TagMetaServiceImpl implements TagMetaService {
                 .map(TagMeta::getTagDescription)
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    public Long calculateTagCodeFromDescriptions(List<String> tagDescriptions) {
+        if (tagDescriptions == null || tagDescriptions.isEmpty()) {
+            return 0L;
+        }
+
+        return tagDescriptions.stream()
+                .map(this::findTagMetaByDescription)
+                .filter(Objects::nonNull)
+                .map(TagMeta::getBitPosition)
+                .map(position -> 1L << position)
+                .reduce(0L, (a, b) -> a | b);
+    }
 
 
     private List<Integer> getActiveBitPositions(Long tagCode) {
@@ -64,5 +78,12 @@ public class TagMetaServiceImpl implements TagMetaService {
         }
 
         return positions;
+    }
+	
+    private TagMeta findTagMetaByDescription(String description) {
+        return tagMetaCache.values().stream()
+                .filter(meta -> description.equals(meta.getTagDescription()))
+                .findFirst()
+                .orElse(null);
     }
 }

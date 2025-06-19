@@ -43,6 +43,9 @@ public class Chat {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String message;
 
+  @Column(name = "mentioned_plans", columnDefinition = "TEXT")
+  private String mentionedPlans;
+  
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private MessageType messageType;

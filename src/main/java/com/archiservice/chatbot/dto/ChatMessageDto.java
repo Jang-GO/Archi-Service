@@ -4,6 +4,11 @@ import com.archiservice.chatbot.domain.Chat;
 import com.archiservice.chatbot.dto.type.MessageType;
 import com.archiservice.chatbot.dto.type.Sender;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +20,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatMessageDto {
   private String messageId;
+  @JsonAlias({"user_id", "userId"})
   private Long userId;
+  @JsonAlias({"ai_response"})
   private String content;
+  @JsonAlias({"message_type", "type"})
   private MessageType type;
   private Sender sender;
   private LocalDateTime timestamp;
@@ -44,4 +53,28 @@ public class ChatMessageDto {
         .timestamp(LocalDateTime.now())
         .build();
   }
+
+  public static ChatMessageDto ofSummary(Long userId, String summary) {
+    return ChatMessageDto.builder()
+            .userId(userId)
+            .content(summary)
+            .type(MessageType.IMAGE_ANALYSIS)
+            .sender(Sender.BOT)
+            .timestamp(LocalDateTime.now())
+            .build();
+  }
+
+  public static ChatMessageDto ofTags(Long userId, List<String> tags) {
+    String tagContent = tags.toString();
+    return ChatMessageDto.builder()
+            .userId(userId)
+            .content(tagContent)
+            .type(MessageType.IMAGE_ANALYSIS)
+            .sender(Sender.BOT)
+            .timestamp(LocalDateTime.now())
+            .build();
+  }
+
+
+
 }

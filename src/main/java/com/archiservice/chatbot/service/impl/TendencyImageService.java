@@ -70,19 +70,47 @@ public class TendencyImageService {
         "/queue/chat",
         infoMessage
     );
-
-
-
   }
-  public void handleTendencyImageResult(TendencyImageResultDto dto){
-    // TODO: 메시지 2개 생성 (summary + tags)
-    // Ex : ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, summary);
-    //      ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, tags);
-    // TODO: ChatMessageDto 변환 및 Redis 저장 (history)
-    // repo.save
-    // redis.save
-    // TODO: WebSocket 전송
-    //messageTemplate~
+
+  // TODO: 메시지 2개 생성 (summary + tags)
+  // Ex : ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, summary);
+  //      ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, tags);
+  // TODO: ChatMessageDto 변환 및 Redis 저장 (history)
+  // repo.save
+  // redis.save
+  // TODO: WebSocket 전송
+  //messageTemplate~
+
+  public void handleTendencyImageResult(TendencyImageResultDto dto) {
+    Long userId = Long.parseLong(dto.getUser_id());
+
+    // 1) ChatMessageDto 두 개 생성 (요약, 태그)
+    ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, dto.getSummary());
+
+    System.out.println("[TendencyImageResult] 수신된 tags: {}" + dto.getTags());
+
+    ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, dto.getTags());
+
+    // 2) DB 저장 (선택)
+//    chatRepository.save(summaryMsg.toEntity());
+//    chatRepository.save(tagsMsg.toEntity());
+
+    // 3) Redis 캐시 저장 (선택)
+//    chatRedisService.cacheChat(userId, summaryMsg);
+//    chatRedisService.cacheChat(userId, tagsMsg);
+
+    // 4) WebSocket 전송
+    messagingTemplate.convertAndSendToUser(
+            String.valueOf(userId),
+            "/queue/chat",
+            summaryMsg
+    );
+    messagingTemplate.convertAndSendToUser(
+            String.valueOf(userId),
+            "/queue/chat",
+            tagsMsg
+    );
+
   }
 
   //메시지 dto 에 맞게 변환?

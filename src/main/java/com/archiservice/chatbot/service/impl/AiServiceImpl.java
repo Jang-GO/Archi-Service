@@ -7,7 +7,7 @@ import com.archiservice.chatbot.dto.request.AuthMetadata;
 import com.archiservice.chatbot.dto.ChatMessageDto;
 import com.archiservice.chatbot.dto.response.ChatResponseDto;
 import com.archiservice.chatbot.dto.type.Sender;
-import com.archiservice.chatbot.redis.RedisStreamService;
+import com.archiservice.chatbot.redis.AiRequestProducer;
 import com.archiservice.chatbot.repository.ChatRepository;
 import com.archiservice.chatbot.service.AiService;
 import com.archiservice.user.domain.User;
@@ -27,8 +27,9 @@ public class AiServiceImpl implements AiService {
   private final ChatRepository chatRepository;
   private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
-  private final RedisStreamService redisStreamService;
+  private final AiRequestProducer aiRequestProducer;
   private final RedisTemplate<String, ChatMessageDto> chatMessageRedisTemplate;
+
   @Override
   public void sendMessageToAI(Chat chat, AuthInfo authInfo) {
     ChatMessageDto requestDto = ChatMessageDto.fromChat(chat);
@@ -36,7 +37,7 @@ public class AiServiceImpl implements AiService {
     AuthMetadata metadata = new AuthMetadata(authInfo.getTagCode(), authInfo.getAgeCode());
     AiPromptMessage aiPromptMessage = new AiPromptMessage(metadata, requestDto);
 
-    redisStreamService.sendToAI(aiPromptMessage);
+    aiRequestProducer.sendToAI(aiPromptMessage);
   }
 
   @Override

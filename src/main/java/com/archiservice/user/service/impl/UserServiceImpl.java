@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 		if (request.getTagCode() != null) {
 	        tagCode = request.getTagCode();
 	    } else if (request.getTagCodes() != null && !request.getTagCodes().isEmpty()) {
-	        tagCode = tagMetaService.calculateTagCodeFromDescriptions(request.getTagCodes());
+	        tagCode = tagMetaService.calculateTagCodeFromKey(request.getTagCodes());
 	    } else {
 	        throw new IllegalArgumentException("태그 정보가 유효하지 않습니다.");
 	    }

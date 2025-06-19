@@ -2,17 +2,13 @@ package com.archiservice.recommend.controller;
 
 import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
-import com.archiservice.recommend.dto.response.RecommendCouponResponseDto;
-import com.archiservice.recommend.dto.response.RecommendPlanResponseDto;
-import com.archiservice.recommend.dto.response.RecommendResponseDto;
-import com.archiservice.recommend.dto.response.RecommendVasResponseDto;
+import com.archiservice.recommend.dto.request.RecommendRequestDto;
+import com.archiservice.recommend.dto.response.*;
 import com.archiservice.recommend.service.RecommendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +18,14 @@ public class RecommendController {
     private final RecommendService recommendService;
 
     @GetMapping()
-    public ResponseEntity<ApiResponse<RecommendResponseDto>> recommend(@AuthenticationPrincipal CustomUser customUser){
+    public ResponseEntity<ApiResponse<RecommendResponseDto>> recommend(@AuthenticationPrincipal CustomUser customUser) {
         return ResponseEntity.ok(ApiResponse.success("조합 추천 성공", recommendService.recommend(customUser)));
+    }
+
+    @PostMapping("/evaluate")
+    public ResponseEntity<ApiResponse<AIRecommendResponseDto>> evaluateRecommend(@AuthenticationPrincipal CustomUser customUser,
+                                                                                 @RequestBody RecommendRequestDto recommend) {
+        return ResponseEntity.ok(ApiResponse.success("추천 평가 성공", recommendService.evaluateRecommend(customUser, recommend)));
     }
 
     @GetMapping("/plan")

@@ -49,11 +49,12 @@ public class AiServiceImpl implements AiService {
         .sender(Sender.BOT)
         .message(aiResponse.getContent())
         .messageType(aiResponse.getType())
+        .mentionedPlans(aiResponse.getMentionedPlans())
         .build();
-    Chat savedChat = chatRepository.save(chat);
-    ChatMessageDto botMessage = ChatMessageDto.fromChat(savedChat);
+    chatRepository.save(chat);
+    aiResponse.setSender(Sender.BOT);
     String key = "chat:user:" + aiResponse.getUserId();
-    chatMessageRedisTemplate.opsForList().rightPush(key, botMessage);
+    chatMessageRedisTemplate.opsForList().rightPush(key, aiResponse);
     chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
     // 타입별 추가 처리
     switch(aiResponse.getType()) {
@@ -71,7 +72,7 @@ public class AiServiceImpl implements AiService {
     messagingTemplate.convertAndSendToUser(
         String.valueOf(aiResponse.getUserId()),
         "/queue/chat",
-        botMessage
+        aiResponse
     );
   }
 }

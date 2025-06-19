@@ -1,18 +1,22 @@
 package com.archiservice.chatbot.dto.response;
 
 import com.archiservice.chatbot.dto.ChatMessageDto;
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import lombok.Data;
 
 @Data
 public class ChatResponseDto extends ChatMessageDto {
   // TODO: 추후 BundleRecommendation 클래스로 변경
   private String bundleRecommendations; // SUGGESTION용
-
+  
   // TODO: 추후 List<String>으로 변경
   private String extractedKeywords; // KEYWORD_RECOMMENDATION용
 
   // TODO: 추후 UserPreference 객체로 변경
   private String updatedPreference; // PREFERENCE_UPDATE용
+  //필드 1: private String summary
+  //필드 2: private String tags
 }
 
 /**

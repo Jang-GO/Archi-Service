@@ -15,12 +15,9 @@ public interface CouponReviewRepository extends JpaRepository<CouponReview, Long
     @Query("SELECT cr FROM CouponReview cr JOIN FETCH cr.user WHERE cr.coupon.couponId = :couponId ORDER BY cr.createdAt DESC")
     Page<CouponReview> findByCouponIdWithUser(@Param("couponId") Long couponId, Pageable pageable);
 
+    List<CouponReview> findByIsModeratedFalse();
+
     boolean existsByUserAndCoupon(User user, Coupon coupon);
-
-    int countCouponReviewByCoupon(Coupon coupon);
-
-    @Query("SELECT AVG(r.score) FROM CouponReview r WHERE r.coupon = :coupon")
-    Double getAverageRatingByCoupon(@Param("coupon") Coupon coupon);
 
     @Query("SELECT AVG(r.score) FROM CouponReview r WHERE r.coupon IS NOT NULL")
     Double findAverageRatingByCouponIsNotNull();
@@ -34,4 +31,18 @@ public interface CouponReviewRepository extends JpaRepository<CouponReview, Long
             nativeQuery = true)
     Double findAverageReviewCountPerCouponNative();
 
+    @Query("SELECT c.couponId, COUNT(cr) FROM CouponReview cr JOIN cr.coupon c " +
+            "WHERE cr.isModerated = true GROUP BY c.couponId HAVING COUNT(cr) >= 5")
+    List<Object[]> findReviewGroupsByCoupon();
+
+    @Query("SELECT cr.content FROM CouponReview cr WHERE cr.coupon.couponId = :couponId " +
+            "AND cr.isModerated = true AND cr.score BETWEEN :minScore AND :maxScore")
+    List<String> findContentsByCouponIdAndScoreRange(@Param("couponId") Long couponId,
+                                                     @Param("minScore") Integer minScore,
+                                                     @Param("maxScore") Integer maxScore);
+
+    @Query("SELECT cr.content FROM CouponReview cr WHERE cr.coupon.couponId = :couponId " +
+            "AND cr.isModerated = true AND cr.score = :score")
+    List<String> findContentsByCouponIdAndScore(@Param("couponId") Long couponId,
+                                                @Param("score") Integer score);
 }

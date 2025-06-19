@@ -80,9 +80,6 @@ public class ChatMessageDto {
             .timestamp(LocalDateTime.now())
             .build();
   }
-
-
-
 }
 
 //content

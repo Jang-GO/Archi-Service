@@ -1,8 +1,11 @@
 package com.archiservice.chatbot.service.impl;
 
+import com.archiservice.chatbot.domain.Chat;
 import com.archiservice.chatbot.dto.ChatMessageDto;
 import com.archiservice.chatbot.dto.request.TendencyImageRequestDto;
 import com.archiservice.chatbot.dto.response.TendencyImageResultDto;
+import com.archiservice.chatbot.dto.type.MessageType;
+import com.archiservice.chatbot.dto.type.Sender;
 import com.archiservice.chatbot.redis.AiImageRequestProducer;
 import com.archiservice.chatbot.repository.ChatRepository;
 import com.archiservice.common.security.CustomUser;
@@ -11,11 +14,15 @@ import com.archiservice.exception.ErrorCode;
 import com.archiservice.exception.business.FileProcessingException;
 import com.archiservice.exception.business.FileTooLargeException;
 import com.archiservice.exception.business.InvalidFileExtensionException;
+import com.archiservice.user.domain.User;
+import com.archiservice.user.repository.UserRepository;
 import io.netty.util.internal.StringUtil;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -26,7 +33,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class TendencyImageService {
   private final SimpMessagingTemplate messagingTemplate;
   private final AiImageRequestProducer aiImageRequestProducer;
-  private ChatRepository chatRepository;
+  private final ChatRepository chatRepository;
+  private final UserRepository userRepository;
+  private final RedisTemplate<String, ChatMessageDto> chatMessageRedisTemplate;
 
   public void sendImageForAnalysis(CustomUser customUser, MultipartFile image) {
     // Id 뽑아내기
@@ -61,11 +70,11 @@ public class TendencyImageService {
 
     // 프론트에 전달(디비 저장은 아닌데 레디스에는 일단 저장)
 
-    ChatMessageDto infoMessage = ChatMessageDto.infoMessage(
-        userId,
-        "사진 분석이 시작되었습니다"
-    );
-
+//    ChatMessageDto infoMessage = ChatMessageDto.infoMessage(
+//        userId,
+//        "사진 분석 요청.."
+//    );
+//
 //    messagingTemplate.convertAndSendToUser(
 //        String.valueOf(userId),
 //        "/queue/chat",
@@ -82,37 +91,49 @@ public class TendencyImageService {
   // TODO: WebSocket 전송
   //messageTemplate~
 
+
   public void handleTendencyImageResult(TendencyImageResultDto dto) {
     Long userId = Long.parseLong(dto.getUser_id());
 
-    // 1) ChatMessageDto 두 개 생성 (요약, 태그)
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
     ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, dto.getSummary());
-
-    System.out.println("[TendencyImageResult] 수신된 tags: {}" + dto.getTags());
-
     ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, dto.getTags());
 
-    // 2) DB 저장 (선택)
-//    chatRepository.save(summaryMsg.toEntity());
-//    chatRepository.save(tagsMsg.toEntity());
+    Chat summaryChat = Chat.builder()
+            .user(user)
+            .sender(Sender.BOT)
+            .message(summaryMsg.getContent())
+            .messageType(MessageType.IMAGE_ANALYSIS)
+            .build();
+    Chat savedSummary = chatRepository.save(summaryChat);
 
-    // 3) Redis 캐시 저장 (선택)
-//    chatRedisService.cacheChat(userId, summaryMsg);
-//    chatRedisService.cacheChat(userId, tagsMsg);
+    Chat tagsChat = Chat.builder()
+            .user(user)
+            .sender(Sender.BOT)
+            .message(tagsMsg.getContent())
+            .messageType(MessageType.IMAGE_ANALYSIS)
+            .build();
+    Chat savedTags = chatRepository.save(tagsChat);
 
-    // 4) WebSocket 전송
+    String key = "chat:user:" + userId;
+    chatMessageRedisTemplate.opsForList().rightPush(key, ChatMessageDto.fromChat(savedSummary));
+    chatMessageRedisTemplate.opsForList().rightPush(key, ChatMessageDto.fromChat(savedTags));
+    chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
+
     messagingTemplate.convertAndSendToUser(
             String.valueOf(userId),
             "/queue/chat",
-            summaryMsg
+            ChatMessageDto.fromChat(savedSummary)
     );
     messagingTemplate.convertAndSendToUser(
             String.valueOf(userId),
             "/queue/chat",
-            tagsMsg
+            ChatMessageDto.fromChat(savedTags)
     );
-
   }
+
 
   //메시지 dto 에 맞게 변환?
   // ChatMessageDto

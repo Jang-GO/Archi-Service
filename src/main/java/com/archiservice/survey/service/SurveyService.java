@@ -1,7 +1,7 @@
-package com.archiservice.tendency.survey.service;
+package com.archiservice.survey.service;
 
 import com.archiservice.common.response.ApiResponse;
-import com.archiservice.tendency.survey.dto.response.QuestionResponseDto;
+import com.archiservice.survey.dto.response.QuestionResponseDto;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

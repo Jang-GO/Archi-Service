@@ -1,4 +1,4 @@
-package com.archiservice.tendency.survey.domain;
+package com.archiservice.survey.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

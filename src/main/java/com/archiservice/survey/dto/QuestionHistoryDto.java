@@ -1,4 +1,4 @@
-package com.archiservice.tendency.survey.dto;
+package com.archiservice.survey.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

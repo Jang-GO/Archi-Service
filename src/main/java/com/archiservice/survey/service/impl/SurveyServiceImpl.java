@@ -1,4 +1,4 @@
-package com.archiservice.tendency.survey.service.impl;
+package com.archiservice.survey.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,11 +14,11 @@ import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
-import com.archiservice.tendency.survey.domain.Question;
-import com.archiservice.tendency.survey.dto.QuestionHistoryDto;
-import com.archiservice.tendency.survey.dto.response.QuestionResponseDto;
-import com.archiservice.tendency.survey.repository.QuestionRepository;
-import com.archiservice.tendency.survey.service.SurveyService;
+import com.archiservice.survey.domain.Question;
+import com.archiservice.survey.dto.QuestionHistoryDto;
+import com.archiservice.survey.dto.response.QuestionResponseDto;
+import com.archiservice.survey.repository.QuestionRepository;
+import com.archiservice.survey.service.SurveyService;
 import com.archiservice.user.domain.User;
 import com.archiservice.user.repository.UserRepository;
 

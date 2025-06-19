@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class TendencyUpdateRequestDto {
-	private List<String> tagCodes;
+	private List<String> tags;
     private Long tagCode;
 }

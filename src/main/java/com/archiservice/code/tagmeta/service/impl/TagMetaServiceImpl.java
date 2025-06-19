@@ -79,8 +79,9 @@ public class TagMetaServiceImpl implements TagMetaService {
 
         return positions;
     }
-	
-    private TagMeta findTagMetaByDescription(String description) {
+    
+    @Override
+    public TagMeta findTagMetaByDescription(String description) {
         return tagMetaCache.values().stream()
                 .filter(meta -> description.equals(meta.getTagDescription()))
                 .findFirst()

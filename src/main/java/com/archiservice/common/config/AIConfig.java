@@ -48,4 +48,11 @@ public class AIConfig {
                 .defaultSystem(new ClassPathResource("prompts/moderation-rule-prompt.txt"))
                 .build();
     }
+
+    @Bean
+    ChatClient reviewSummaryBot(ChatClient.Builder builder) {
+        return builder
+                .defaultSystem(new ClassPathResource("prompts/review-summary-rule-prompt.txt"))
+                .build();
+    }
 }

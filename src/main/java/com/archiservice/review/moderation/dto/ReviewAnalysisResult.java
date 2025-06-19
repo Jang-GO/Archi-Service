@@ -1,4 +1,4 @@
-package com.archiservice.review.ai.dto;
+package com.archiservice.review.moderation.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;

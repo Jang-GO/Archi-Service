@@ -1,6 +1,6 @@
-package com.archiservice.review.ai.service;
+package com.archiservice.review.moderation.service;
 
-import com.archiservice.review.ai.dto.ModerationResult;
+import com.archiservice.review.moderation.dto.ModerationResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;

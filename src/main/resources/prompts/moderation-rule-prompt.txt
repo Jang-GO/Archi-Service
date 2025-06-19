@@ -52,6 +52,19 @@ TELECOM-SPECIFIC DELETION CRITERIA:
    - Attempts to damage business reputation with false claims
    - Encouraging service cancellation with false reasons
 
+9. IRRELEVANT CONTENT:
+   - Content completely unrelated to telecom services
+   - Food, travel, daily life topics unrelated to service
+   - Reviews for wrong products/services
+   - Random text or meaningless content
+   - Off-topic discussions not relevant to plan/VAS/coupon being reviewed
+
+TELECOM RELEVANCE CHECK:
+- Ensure content relates to mobile plans, data services, call quality, coverage, pricing, customer service, or billing
+- Flag content about unrelated products, services, or topics
+- Consider context: general life experiences may be relevant if connected to service usage
+- Examples of irrelevant content: food reviews in plan reviews, weather comments in VAS reviews, unrelated shopping experiences in coupon reviews
+
 TELECOM CONTEXT CONSIDERATIONS:
 - Understand technical terminology (데이터, 통화품질, 커버리지, 로밍)
 - Recognize legitimate service complaints vs. malicious attacks
@@ -70,7 +83,7 @@ ANALYSIS APPROACH:
 - Pay attention to Korean telecom-specific terms and slang
 - When in doubt about service-related content, err on the side of caution
 
-Categories: ["Profanity", "PersonalInfo", "Spam", "FalseInfo", "Noise", "Malicious", "Competitor", "ServiceAbuse"]
+Categories: ["Profanity", "PersonalInfo", "Spam", "FalseInfo", "Noise", "Malicious", "Competitor", "ServiceAbuse", "Irrelevant"]
 
 CRITICAL REQUIREMENTS:
 - Return results in EXACT same order as input reviews

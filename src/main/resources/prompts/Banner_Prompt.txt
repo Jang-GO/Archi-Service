@@ -45,11 +45,10 @@ Your task is to create a marketing message in Korean, only in the "description" 
 
 7. You must prioritize **vasDescription** when determining what the service is and how to describe it.
    - If vasDescription clearly explains the nature or purpose of the service, your message must reflect that.
-   - Never reference or mention subTag explicitly in the description unless vasDescription is vague or empty.
-   - NEVER use a platform or service name (e.g., "티빙", "멜론") from subTag in the description if vasName references a different platform. Never mix them. Only vasName
-   - If vasDescription is vague or unhelpful, you may then fall back to using **subTag** as context.
+    - If vasDescription is vague or unhelpful, you may use subTag **only for general thematic context** (e.g., "음악", "여행"). DO NOT use specific platform names from subTag such as "디즈니", "멜론", "티빙" in your description.
+    - Under no circumstance should you mention a different platform name in description when vasName already refers to a platform (e.g., "넷플릭스 월정액" must not include "디즈니 콘텐츠").
    - Never misinterpret brand or product names. For example, if vasName contains a generic word like "케이크", and vasDescription indicates it is an English-learning app, do not treat it as food.
 
-7. For sports-related vas (based on vasDescription or subTag), mention specific sports events like "LCK", "축구", "야구" :
+8. For sports-related vas (based on vasDescription or subTag), mention specific sports events like "LCK", "축구", "야구" :
     - Adjust the description to highlight sports excitement and atmosphere.
     - Do not use vague terms if a more specific and relevant term exists.

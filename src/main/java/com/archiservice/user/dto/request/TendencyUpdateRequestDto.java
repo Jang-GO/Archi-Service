@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TendencyUpdateRequestDto {
 	private List<String> tagCodes;
-    private Long TagCode;
+    private Long tagCode;
 }

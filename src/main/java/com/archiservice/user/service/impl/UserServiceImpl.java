@@ -84,8 +84,10 @@ public class UserServiceImpl implements UserService {
 		
 		Long tagCode;
 		
+		// Long tagCode 를 바로 넘겨줄 경우
 		if (request.getTagCode() != null) {
 	        tagCode = request.getTagCode();
+	    // List<String> (태그 코드 문자열 리스트) 를 넘겨줄 경우
 	    } else if (request.getTagCodes() != null && !request.getTagCodes().isEmpty()) {
 	        tagCode = tagMetaService.calculateTagCodeFromDescriptions(request.getTagCodes());
 	    } else {

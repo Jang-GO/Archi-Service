@@ -38,14 +38,12 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
-  metrics:
-    export:
-      prometheus:
+        include: prometheus, health, info
+
+  prometheus:
+    metrics:
+      export:
         enabled: true
-  endpoint:
-    prometheus:
-      enabled: true
 
 app:
   upload-dir: uploads/

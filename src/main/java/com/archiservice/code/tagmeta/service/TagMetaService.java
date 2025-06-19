@@ -6,5 +6,5 @@ import java.util.Set;
 
 public interface TagMetaService {
     List<String> extractTagsFromCode(Long tagCode);
-    Long calculateTagCodeFromDescriptions(List<String> tagDescriptions);
+    Long calculateTagCodeFromKey(List<String> tagKeys);
 }

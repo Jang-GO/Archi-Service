@@ -36,6 +36,9 @@ public class PlanReview extends TimeStamp {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "is_moderated", nullable = false)
+    private Boolean isModerated = false;
+
     @Builder
     public PlanReview(User user, Plan plan, Integer score, String content) {
         this.user = user;
@@ -47,11 +50,16 @@ public class PlanReview extends TimeStamp {
     public void updateReview(Integer score, String content) {
         this.score = score;
         this.content = content;
+        this.isModerated=false;
     }
 
     public void validateOwner(Long userId) {
         if (!this.user.getUserId().equals(userId)) {
             throw new NotMyReviewException(ErrorCode.NOT_MY_REVIEW.getMessage());
         }
+    }
+
+    public void markAsModerated() {
+        this.isModerated = true;
     }
 }

@@ -1,9 +1,13 @@
 package com.archiservice.chatbot.dto;
 
+import java.time.LocalDateTime;
+
 import com.archiservice.chatbot.domain.Chat;
 import com.archiservice.chatbot.dto.type.MessageType;
 import com.archiservice.chatbot.dto.type.Sender;
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,11 +19,17 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChatMessageDto {
   private String messageId;
+  @JsonAlias({"user_id", "userId"})
   private Long userId;
+  @JsonAlias({"ai_response"})
   private String content;
+  @JsonAlias({"message_type", "type"})
   private MessageType type;
+  @JsonAlias({"mentioned_plans"})
+  private String mentionedPlans;
   private Sender sender;
   private LocalDateTime timestamp;
 
@@ -34,3 +44,5 @@ public class ChatMessageDto {
         .build();
   }
 }
+
+//content

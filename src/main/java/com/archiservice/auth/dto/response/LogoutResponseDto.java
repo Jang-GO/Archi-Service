@@ -4,5 +4,5 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class LogoutResponseDto {
-    private String email;
+    private Long userId;
 }

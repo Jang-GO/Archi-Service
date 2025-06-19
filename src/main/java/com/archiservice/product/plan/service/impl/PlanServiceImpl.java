@@ -1,6 +1,15 @@
 package com.archiservice.product.plan.service.impl;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.archiservice.code.commoncode.service.CommonCodeService;
+import com.archiservice.code.tagmeta.service.TagMetaService;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
 import com.archiservice.product.plan.domain.Plan;
@@ -8,14 +17,8 @@ import com.archiservice.product.plan.dto.response.PlanDetailResponseDto;
 import com.archiservice.product.plan.dto.response.PlanResponseDto;
 import com.archiservice.product.plan.repository.PlanRepository;
 import com.archiservice.product.plan.service.PlanService;
-import com.archiservice.code.tagmeta.service.TagMetaService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -51,5 +54,32 @@ public class PlanServiceImpl implements PlanService {
         String targetAge = commonCodeService.getCodeName(AGE_GROUP_CODE, plan.getAgeCode());
 
         return PlanDetailResponseDto.from(plan, tags, category, targetAge);
+    }
+    @Override
+    public PlanDetailResponseDto findPlanByName(String planName) {
+        Optional<Plan> exactMatch = planRepository.findByPlanName(planName);
+        if (exactMatch.isPresent()) {
+            Plan plan = exactMatch.get();
+            List<String> tags = tagMetaService.extractTagsFromCode(plan.getTagCode());
+            String category = commonCodeService.getCodeName(CATEGORY_GROUP_CODE, plan.getCategoryCode());
+            String targetAge = commonCodeService.getCodeName(AGE_GROUP_CODE, plan.getAgeCode());
+            return PlanDetailResponseDto.from(plan, tags, category, targetAge);
+        }
+
+        String normalizedSearchName = planName.replaceAll("\\s+", "").toLowerCase();
+        List<Plan> allPlans = planRepository.findAll();
+
+        for (Plan plan : allPlans) {
+            String normalizedPlanName = plan.getPlanName().replaceAll("\\s+", "").toLowerCase();
+            if (normalizedPlanName.contains(normalizedSearchName) || 
+                normalizedSearchName.contains(normalizedPlanName)) {
+                List<String> tags = tagMetaService.extractTagsFromCode(plan.getTagCode());
+                String category = commonCodeService.getCodeName(CATEGORY_GROUP_CODE, plan.getCategoryCode());
+                String targetAge = commonCodeService.getCodeName(AGE_GROUP_CODE, plan.getAgeCode());
+                return PlanDetailResponseDto.from(plan, tags, category, targetAge);
+            }
+        }
+
+        return null;
     }
 }

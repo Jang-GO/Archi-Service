@@ -1,5 +1,6 @@
-package com.archiservice.badword;
+package com.archiservice.badword.service;
 
+import com.archiservice.badword.NoBadWords;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -33,4 +34,5 @@ public class BadWordValidator implements ConstraintValidator<NoBadWords, String>
         return isValid;
     }
 }
+
 

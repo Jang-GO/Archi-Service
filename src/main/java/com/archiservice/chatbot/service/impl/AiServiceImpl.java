@@ -13,6 +13,10 @@ import com.archiservice.chatbot.service.AiService;
 import com.archiservice.user.domain.User;
 import com.archiservice.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.time.Duration;
+
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +28,7 @@ public class AiServiceImpl implements AiService {
   private final UserRepository userRepository;
   private final SimpMessagingTemplate messagingTemplate;
   private final RedisStreamService redisStreamService;
-
+  private final RedisTemplate<String, ChatMessageDto> chatMessageRedisTemplate;
   @Override
   public void sendMessageToAI(Chat chat, AuthInfo authInfo) {
     ChatMessageDto requestDto = ChatMessageDto.fromChat(chat);
@@ -44,9 +48,13 @@ public class AiServiceImpl implements AiService {
         .sender(Sender.BOT)
         .message(aiResponse.getContent())
         .messageType(aiResponse.getType())
+        .mentionedPlans(aiResponse.getMentionedPlans())
         .build();
     chatRepository.save(chat);
-
+    aiResponse.setSender(Sender.BOT);
+    String key = "chat:user:" + aiResponse.getUserId();
+    chatMessageRedisTemplate.opsForList().rightPush(key, aiResponse);
+    chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
     // 타입별 추가 처리
     switch(aiResponse.getType()) {
       case SUGGESTION:

@@ -15,6 +15,8 @@ public interface CouponReviewRepository extends JpaRepository<CouponReview, Long
     @Query("SELECT cr FROM CouponReview cr JOIN FETCH cr.user WHERE cr.coupon.couponId = :couponId ORDER BY cr.createdAt DESC")
     Page<CouponReview> findByCouponIdWithUser(@Param("couponId") Long couponId, Pageable pageable);
 
+    List<CouponReview> findByIsModeratedFalse();
+
     boolean existsByUserAndCoupon(User user, Coupon coupon);
 
     int countCouponReviewByCoupon(Coupon coupon);

@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtUtil.generateAccessToken(customUser);
         String refreshToken = jwtUtil.generateRefreshToken(customUser);
 
-        refreshTokenService.saveRefreshToken(user.getEmail(), refreshToken);
+        refreshTokenService.saveRefreshToken(user.getUserId(), refreshToken);
 
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
@@ -62,12 +62,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ApiResponse<RefreshResponseDto> refresh(String refreshTokenHeader) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
-
+        
+        Long userId = customUser.getId();
         String newAccessToken = jwtUtil.generateAccessToken(customUser);
 
-        RefreshResponseDto responseDto = new RefreshResponseDto(email, newAccessToken);
+        RefreshResponseDto responseDto = new RefreshResponseDto(userId, newAccessToken);
 
         return ApiResponse.success("재발급 완료", responseDto);
     }
@@ -80,11 +80,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String accessToken = accessTokenHeader.replace("Bearer ", "");
-        String email = jwtUtil.extractEmail(accessToken);
+        Long userId = jwtUtil.extractUserId(accessToken);
 
-        refreshTokenService.deleteRefreshToken(email);
+        refreshTokenService.deleteRefreshToken(userId);
 
-        LogoutResponseDto dto = new LogoutResponseDto(email);
+        LogoutResponseDto dto = new LogoutResponseDto(userId);
 
         return ApiResponse.success("로그아웃이 완료되었습니다", dto);
 

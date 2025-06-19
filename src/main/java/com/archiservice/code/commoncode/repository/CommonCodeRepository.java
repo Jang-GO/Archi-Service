@@ -14,4 +14,7 @@ public interface CommonCodeRepository extends JpaRepository<CommonCode, CommonCo
     Optional<CommonCode> findByGroupCodeAndCommonCode(
             @Param("groupCode") String groupCode,
             @Param("commonCode") String commonCode);
+
+    @Query("SELECT cc.commonCodeId.commonCode FROM CommonCode cc WHERE cc.commonCodeId.groupCode = :groupCode AND cc.commonName = :commonName")
+    Optional<String> findCommonCodeByGroupCodeAndCommonName(@Param("groupCode") String groupCode, @Param("commonName") String commonName);
 }

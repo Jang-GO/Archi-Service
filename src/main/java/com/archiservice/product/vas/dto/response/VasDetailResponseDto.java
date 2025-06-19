@@ -6,7 +6,9 @@ import lombok.*;
 
 import java.util.List;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class VasDetailResponseDto {
     private Long vasId;

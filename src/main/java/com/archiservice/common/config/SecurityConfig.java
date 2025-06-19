@@ -25,7 +25,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
     private final String[] WHITE_LIST = {
-            "/auth/login","/auth/refresh", "/users/signup",
+            "/auth/login","/auth/refresh", "/users/signup", "/", "/index.html",
             "/plans/*","/plans", "/vass/**", "/coupons/**", "/ws/**", "surveyTest.html", "/actuator/prometheus", "/actuator/health", "/actuator/info"
     };
 
@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST).permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/plans/*/reviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/vass/*/reviews").permitAll()
                         .requestMatchers(HttpMethod.GET, "/coupons/*/reviews").permitAll()

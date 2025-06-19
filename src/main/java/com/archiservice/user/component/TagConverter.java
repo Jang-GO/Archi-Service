@@ -65,6 +65,7 @@ public class TagConverter {
         korToEng.put("축구", "soccer");
         korToEng.put("게임", "game");
         // Cafe
+        korToEng.put("카페", "cafe");
         korToEng.put("커피", "coffee");
         korToEng.put("빵", "bread");
         // Music

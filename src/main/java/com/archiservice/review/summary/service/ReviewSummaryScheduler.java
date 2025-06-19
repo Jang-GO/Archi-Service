@@ -17,14 +17,13 @@ public class ReviewSummaryScheduler {
         this.summaryService = summaryService;
     }
 
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 55 * * * *")
     public void scheduledReviewSummary() {
         log.info("=== 스케줄링된 리뷰 요약 작업 시작 ===");
 
         try {
             CompletableFuture<SummaryResult> futureResult  = summaryService.summarizeAllProductReviews();
 
-            // 비동기 작업 완료까지 대기
             SummaryResult result = futureResult.get();
 
             log.info("리뷰 요약 작업 완료 - 총 상품: {}, 요약 완료: {}, 소요시간: {}ms",

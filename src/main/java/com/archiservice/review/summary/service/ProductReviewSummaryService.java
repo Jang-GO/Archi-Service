@@ -106,12 +106,21 @@ public class ProductReviewSummaryService {
 
     private SummaryResult processReviewGroups(List<Object[]> reviewGroups, String reviewType) {
         int summarizedCount = 0;
+        int skippedCount = 0;
 
         for (Object[] group : reviewGroups) {
             Long productId = (Long) group[0];
             Long reviewCount = (Long) group[1];
 
-            log.debug("{} 상품 ID {} 처리 시작 (리뷰 {}개)", reviewType, productId, reviewCount);
+            if (reviewCount < 5) {
+                continue;
+            }
+
+            if (!hasReviewCountChanged(productId, reviewType, reviewCount.intValue())) {
+                skippedCount++;
+                log.debug("{} 상품 ID {} - 리뷰 변경 없음, 스킵", reviewType, productId);
+                continue;
+            }
 
             RatingBasedReviews ratingReviews = getReviewsByRating(productId, reviewType);
 
@@ -271,4 +280,17 @@ public class ProductReviewSummaryService {
 
         return Math.round((totalScore / totalReviews) * 10.0) / 10.0;
     }
+
+    private boolean hasReviewCountChanged(Long productId, String reviewType, Integer currentCount) {
+        Optional<ProductReviewSummary> existingSummary =
+                summaryRepository.findByProductIdAndReviewType(productId, reviewType);
+
+        if (existingSummary.isEmpty()) {
+            return true;
+        }
+
+        Integer existingCount = existingSummary.get().getTotalReviewCount();
+        return !currentCount.equals(existingCount);
+    }
+
 }

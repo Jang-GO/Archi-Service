@@ -1,7 +1,6 @@
 package com.archiservice.user.service.impl;
 
 import com.archiservice.code.tagmeta.service.TagMetaService;
-import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.business.InvalidPasswordException;
 import com.archiservice.exception.business.UserNotFoundException;
@@ -69,4 +68,5 @@ public class UserServiceImpl implements UserService {
 
         return tendencies;
     }
+
 }

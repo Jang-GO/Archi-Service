@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private final TagMetaService tagMetaService;
     private final JwtUtil jwtUtil;
     private final TagMetaService metaService;
-    
+
 
     @Override
     public ProfileResponseDto getUserProfile(CustomUser customUser) {
@@ -81,9 +81,9 @@ public class UserServiceImpl implements UserService {
 	public String updateTendency(TendencyUpdateRequestDto request, CustomUser customUser) {
 		User user = userRepository.findById(customUser.getId())
 				.orElseThrow(() -> new UserNotFoundException("올바른 사용자 정보를 가져오지 못했습니다."));
-		
+
 		Long tagCode;
-		
+
 		if (request.getTagCode() != null) {
 	        tagCode = request.getTagCode();
 	    } else if (request.getTagCodes() != null && !request.getTagCodes().isEmpty()) {
@@ -91,12 +91,12 @@ public class UserServiceImpl implements UserService {
 	    } else {
 	        throw new IllegalArgumentException("태그 정보가 유효하지 않습니다.");
 	    }
-		
+
 		user.setTagCode(tagCode);
 		userRepository.save(user);
-		
+
 		String accessToken = jwtUtil.generateAccessToken(customUser);
 		return accessToken;
 	}
-    
+
 }

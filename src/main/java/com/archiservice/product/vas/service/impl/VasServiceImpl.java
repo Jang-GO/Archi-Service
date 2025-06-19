@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -59,4 +60,19 @@ public class VasServiceImpl implements VasService {
 
         return VasDetailResponseDto.from(vas, tags, category, simplifiedSummaryResult);
     }
+
+    @Override
+    public Vas getRandVasByCategoryCode(String categoryCode) {
+        List<Vas> vasList = vasRepository.findVasByCategoryCode(categoryCode);
+
+        if (vasList == null || vasList.isEmpty()) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        int randomIndex = new Random().nextInt(vasList.size());
+
+        return vasList.get(randomIndex);
+    }
+
+
 }

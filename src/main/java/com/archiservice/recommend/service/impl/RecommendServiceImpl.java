@@ -34,11 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RecommendServiceImpl implements RecommendService {
 
-    @Qualifier("recommendChatClient")
     private final ChatClient recommendChatClient;
 
     private final TagMetaService tagMetaService;
@@ -55,8 +53,30 @@ public class RecommendServiceImpl implements RecommendService {
     private final PlanReviewService planReviewService;
     private final VasReviewService vasReviewService;
     private final CouponReviewService couponReviewService;
+    
+    
 
-    @Override
+    public RecommendServiceImpl(@Qualifier("recommendChatClient") ChatClient recommendChatClient, TagMetaService tagMetaService,
+			PlanRepository planRepository, VasRepository vasRepository, PlanReviewRepository planReviewRepository,
+			VasReviewRepository vasReviewRepository, CouponReviewRepository couponReviewRepository,
+			CouponRepository couponRepository, CommonCodeService commonCodeService, PlanReviewService planReviewService,
+			VasReviewService vasReviewService, CouponReviewService couponReviewService) {
+		super();
+		this.recommendChatClient = recommendChatClient;
+		this.tagMetaService = tagMetaService;
+		this.planRepository = planRepository;
+		this.vasRepository = vasRepository;
+		this.planReviewRepository = planReviewRepository;
+		this.vasReviewRepository = vasReviewRepository;
+		this.couponReviewRepository = couponReviewRepository;
+		this.couponRepository = couponRepository;
+		this.commonCodeService = commonCodeService;
+		this.planReviewService = planReviewService;
+		this.vasReviewService = vasReviewService;
+		this.couponReviewService = couponReviewService;
+	}
+
+	@Override
     public RecommendResponseDto recommend (CustomUser user) {
         return RecommendResponseDto.from(recommendPlan(user), recommendVas(user), recommendCoupon(user));
     }

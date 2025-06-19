@@ -8,6 +8,7 @@ import com.archiservice.chatbot.dto.type.MessageType;
 import com.archiservice.chatbot.dto.type.Sender;
 import com.archiservice.chatbot.redis.AiImageRequestProducer;
 import com.archiservice.chatbot.repository.ChatRepository;
+import com.archiservice.chatbot.service.TendencyImageService;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
@@ -15,8 +16,12 @@ import com.archiservice.exception.business.FileProcessingException;
 import com.archiservice.exception.business.FileTooLargeException;
 import com.archiservice.exception.business.InvalidFileExtensionException;
 import com.archiservice.user.domain.User;
+import com.archiservice.user.dto.request.TendencyUpdateRequestDto;
 import com.archiservice.user.repository.UserRepository;
-import io.netty.util.internal.StringUtil;
+import com.archiservice.user.service.UserService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
@@ -30,20 +35,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-public class TendencyImageService {
+public class TendencyImageServiceImpl implements TendencyImageService {
+
   private final SimpMessagingTemplate messagingTemplate;
   private final AiImageRequestProducer aiImageRequestProducer;
   private final ChatRepository chatRepository;
   private final UserRepository userRepository;
   private final RedisTemplate<String, ChatMessageDto> chatMessageRedisTemplate;
+  private final UserService userService;
+  private final ObjectMapper objectMapper;
 
+  @Override
   public void sendImageForAnalysis(CustomUser customUser, MultipartFile image) {
-    // Id 뽑아내기
-    Long userId = customUser.getId();
 
-    /**
-     * 로직 : 파일 검토, 메시지 프로듀서 전달
-     */
+    Long userId = customUser.getId();
 
     String originalFilename = image.getOriginalFilename();
     String ext = StringUtils.getFilenameExtension(originalFilename);
@@ -63,43 +68,42 @@ public class TendencyImageService {
       throw new FileProcessingException();
     }
 
-    // 인공지능 서버에 전달
-    TendencyImageRequestDto dto = TendencyImageRequestDto.of(userId.toString(),base64Image);
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+    Chat userChat = Chat.builder()
+            .user(user)
+            .sender(Sender.USER)
+            .message("이미지 분석을 요청했습니다.")
+            .messageType(MessageType.USER_MESSAGE)
+            .build();
+
+    Chat savedUserChat = chatRepository.save(userChat);
+
+    String key = "chat:user:" + userId;
+    chatMessageRedisTemplate.opsForList().rightPush(key, ChatMessageDto.fromChat(savedUserChat));
+    chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
+
+    messagingTemplate.convertAndSendToUser(
+            String.valueOf(userId),
+            "/queue/chat",
+            ChatMessageDto.fromChat(savedUserChat)
+    );
+
+    TendencyImageRequestDto dto = TendencyImageRequestDto.of(userId.toString(), base64Image);
     aiImageRequestProducer.sendToAI(dto);
-
-    // 프론트에 전달(디비 저장은 아닌데 레디스에는 일단 저장)
-
-//    ChatMessageDto infoMessage = ChatMessageDto.infoMessage(
-//        userId,
-//        "사진 분석 요청.."
-//    );
-//
-//    messagingTemplate.convertAndSendToUser(
-//        String.valueOf(userId),
-//        "/queue/chat",
-//        infoMessage
-//    );
   }
 
-  // TODO: 메시지 2개 생성 (summary + tags)
-  // Ex : ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, summary);
-  //      ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, tags);
-  // TODO: ChatMessageDto 변환 및 Redis 저장 (history)
-  // repo.save
-  // redis.save
-  // TODO: WebSocket 전송
-  //messageTemplate~
-
-
+  @Override
   public void handleTendencyImageResult(TendencyImageResultDto dto) {
     Long userId = Long.parseLong(dto.getUser_id());
 
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+    String key = "chat:user:" + userId;
+
     ChatMessageDto summaryMsg = ChatMessageDto.ofSummary(userId, dto.getSummary());
-    ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, dto.getTags());
 
     Chat summaryChat = Chat.builder()
             .user(user)
@@ -109,32 +113,53 @@ public class TendencyImageService {
             .build();
     Chat savedSummary = chatRepository.save(summaryChat);
 
-    Chat tagsChat = Chat.builder()
-            .user(user)
-            .sender(Sender.BOT)
-            .message(tagsMsg.getContent())
-            .messageType(MessageType.IMAGE_ANALYSIS)
-            .build();
-    Chat savedTags = chatRepository.save(tagsChat);
-
-    String key = "chat:user:" + userId;
     chatMessageRedisTemplate.opsForList().rightPush(key, ChatMessageDto.fromChat(savedSummary));
-    chatMessageRedisTemplate.opsForList().rightPush(key, ChatMessageDto.fromChat(savedTags));
-    chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
-
     messagingTemplate.convertAndSendToUser(
             String.valueOf(userId),
             "/queue/chat",
             ChatMessageDto.fromChat(savedSummary)
     );
-    messagingTemplate.convertAndSendToUser(
-            String.valueOf(userId),
-            "/queue/chat",
-            ChatMessageDto.fromChat(savedTags)
-    );
+
+    String rawTags = dto.getTags();
+    boolean hasValidTags = rawTags != null
+            && !rawTags.isBlank()
+            && !rawTags.trim().equals("[]");
+
+    if (hasValidTags) {
+      List<String> tagList;
+      try {
+        tagList = objectMapper.readValue(rawTags, new TypeReference<List<String>>() {});
+      } catch (Exception e) {
+        tagList = List.of();  // fallback
+      }
+
+      if (!tagList.isEmpty()) {
+        ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, rawTags);
+
+        Chat tagsChat = Chat.builder()
+                .user(user)
+                .sender(Sender.BOT)
+                .message(tagsMsg.getContent())
+                .messageType(MessageType.IMAGE_ANALYSIS)
+                .build();
+        Chat savedTags = chatRepository.save(tagsChat);
+
+        chatMessageRedisTemplate.opsForList().rightPush(key, ChatMessageDto.fromChat(savedTags));
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(userId),
+                "/queue/chat",
+                ChatMessageDto.fromChat(savedTags)
+        );
+
+        TendencyUpdateRequestDto tendencyUpdateRequestDto = new TendencyUpdateRequestDto();
+        tendencyUpdateRequestDto.setTagCodes(tagList);
+
+        userService.updateTendency(tendencyUpdateRequestDto, new CustomUser(user));
+      }
+    }
+    chatMessageRedisTemplate.expire(key, Duration.ofHours(24));
   }
 
 
-  //메시지 dto 에 맞게 변환?
-  // ChatMessageDto
+
 }

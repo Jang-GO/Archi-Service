@@ -1,8 +1,7 @@
 package com.archiservice.chatbot.redis;
 
-import com.archiservice.chatbot.dto.ChatMessageDto;
 import com.archiservice.chatbot.dto.response.TendencyImageResultDto;
-import com.archiservice.chatbot.service.impl.TendencyImageService;
+import com.archiservice.chatbot.service.impl.TendencyImageServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
@@ -26,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AiImageResponseConsumer {
 
-  private final TendencyImageService tendencyImageService;
+  private final TendencyImageServiceImpl tendencyImageService;
   private final StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamContainer;
   private final RedisTemplate<String, Object> redisTemplate;
   private final ObjectMapper objectMapper;
@@ -43,13 +42,26 @@ public class AiImageResponseConsumer {
 
   private void handleMessage(MapRecord<String, String, String> record) {
     try {
+      String streamId = record.getId().getValue();
+      String key = "processed:image-response:" + streamId;
+
+      Boolean first = redisTemplate.opsForValue().setIfAbsent(key, "1", java.time.Duration.ofMinutes(10));
+      if (Boolean.FALSE.equals(first)) {
+        log.info("[Consumer] 이미 처리된 메시지: {}", streamId);
+        redisTemplate.opsForStream().acknowledge("image-response-handler", record);
+        return;
+      }
+
       TendencyImageResultDto resultDto = convertToDto(record.getValue());
       tendencyImageService.handleTendencyImageResult(resultDto);
+
       redisTemplate.opsForStream().acknowledge("image-response-handler", record);
+
     } catch (Exception e) {
       log.error("이미지 성향 메시지 처리 실패: {}", e.getMessage(), e);
     }
   }
+
 
   private TendencyImageResultDto convertToDto(Map<String, String> map) {
     return objectMapper.convertValue(map, TendencyImageResultDto.class);

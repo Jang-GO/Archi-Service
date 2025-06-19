@@ -1,8 +1,9 @@
 package com.archiservice.chatbot.controller;
 
+import com.archiservice.chatbot.service.TendencyImageService;
 import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
-import com.archiservice.chatbot.service.impl.TendencyImageService;
+import com.archiservice.chatbot.service.impl.TendencyImageServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

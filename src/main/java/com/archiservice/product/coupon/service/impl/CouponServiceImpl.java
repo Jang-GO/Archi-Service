@@ -12,7 +12,6 @@ import com.archiservice.product.coupon.service.CouponService;
 import com.archiservice.review.summary.domain.ProductReviewSummary;
 import com.archiservice.review.summary.dto.SimplifiedSummaryResult;
 import com.archiservice.review.summary.repository.ProductReviewSummaryRepository;
-import com.archiservice.review.summary.service.ProductReviewSummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

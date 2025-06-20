@@ -9,7 +9,6 @@ import com.archiservice.user.dto.request.ReservationRequestDto;
 import com.archiservice.user.dto.response.ContractDetailResponseDto;
 import com.archiservice.user.enums.Period;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ContractService {
@@ -25,5 +24,4 @@ public interface ContractService {
 
     void determineContractAction(ReservationRequestDto requestDto, CustomUser customUser);
 
-    void renewContract(LocalDate today);
 }

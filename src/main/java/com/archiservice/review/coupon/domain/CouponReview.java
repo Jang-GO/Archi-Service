@@ -59,8 +59,5 @@ public class CouponReview extends TimeStamp {
         }
     }
 
-    public void markAsModerated() {
-        this.isModerated = true;
-    }
 }
 

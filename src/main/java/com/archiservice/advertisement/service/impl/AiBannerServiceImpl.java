@@ -1,4 +1,4 @@
-package com.archiservice.user.service.impl;
+package com.archiservice.advertisement.service.impl;
 
 import com.archiservice.code.commoncode.service.CommonCodeService;
 import com.archiservice.code.tagmeta.service.TagMetaService;
@@ -6,13 +6,13 @@ import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.business.UserNotFoundException;
 import com.archiservice.product.vas.domain.Vas;
 import com.archiservice.product.vas.service.VasService;
-import com.archiservice.user.component.TagConverter;
-import com.archiservice.user.component.TagMappingComponent;
+import com.archiservice.code.tagmeta.component.TagConverter;
+import com.archiservice.code.tagmeta.component.TagMappingComponent;
 import com.archiservice.user.domain.User;
-import com.archiservice.user.dto.request.BannerRequestDto;
-import com.archiservice.user.dto.response.BannerResponseDto;
+import com.archiservice.advertisement.dto.request.BannerRequestDto;
+import com.archiservice.advertisement.dto.response.BannerResponseDto;
 import com.archiservice.user.repository.UserRepository;
-import com.archiservice.user.service.AiBannerService;
+import com.archiservice.advertisement.service.AiBannerService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;

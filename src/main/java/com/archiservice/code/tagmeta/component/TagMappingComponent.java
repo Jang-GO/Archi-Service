@@ -1,4 +1,4 @@
-package com.archiservice.user.component;
+package com.archiservice.code.tagmeta.component;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

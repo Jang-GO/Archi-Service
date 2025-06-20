@@ -1,6 +1,6 @@
-package com.archiservice.advertisement.service;
+package com.archiservice.advertisement.service.impl;
 
-import com.archiservice.advertisement.dto.BannerClickRequest;
+import com.archiservice.advertisement.dto.request.BannerClickRequest;
 import com.archiservice.chatbot.domain.AuthInfo;
 import com.archiservice.chatbot.dto.request.ChatMessageRequestDto;
 import com.archiservice.chatbot.service.ChatService;

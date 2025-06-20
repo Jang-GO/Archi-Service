@@ -1,4 +1,4 @@
-package com.archiservice.user.dto.response;
+package com.archiservice.advertisement.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

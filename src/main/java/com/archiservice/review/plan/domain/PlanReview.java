@@ -59,7 +59,4 @@ public class PlanReview extends TimeStamp {
         }
     }
 
-    public void markAsModerated() {
-        this.isModerated = true;
-    }
 }

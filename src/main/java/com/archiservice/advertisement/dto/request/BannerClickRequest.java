@@ -1,4 +1,4 @@
-package com.archiservice.advertisement.dto;
+package com.archiservice.advertisement.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,8 +1,8 @@
-package com.archiservice.user.service;
+package com.archiservice.advertisement.service;
 
 import com.archiservice.common.security.CustomUser;
-import com.archiservice.user.dto.request.BannerRequestDto;
-import com.archiservice.user.dto.response.BannerResponseDto;
+import com.archiservice.advertisement.dto.request.BannerRequestDto;
+import com.archiservice.advertisement.dto.response.BannerResponseDto;
 
 import java.util.List;
 

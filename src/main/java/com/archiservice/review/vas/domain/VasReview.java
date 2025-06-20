@@ -60,7 +60,4 @@ public class VasReview extends TimeStamp {
         }
     }
 
-    public void markAsModerated() {
-        this.isModerated = true;
-    }
 }

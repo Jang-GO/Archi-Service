@@ -151,27 +151,4 @@ public class ContractServiceImpl implements ContractService {
             updateNextContract(requestDto, customUser);
         }
     }
-
-    @Override
-    @Transactional
-    public void renewContract(LocalDate today) {
-        List<Contract> expiredContractList = contractRepository.findByEndDate(today)
-                .orElseThrow(() -> new ContractNotFoundException(ErrorCode.CONTRACT_NOT_FOUND.getMessage()));
-
-        for(Contract contract : expiredContractList) {
-            User user = contract.getUser();
-
-            Contract renewedContract = Contract.builder()
-                    .productBundle(contract.getProductBundle())
-                    .user(user)
-                    .paymentMethod(contract.getPaymentMethod())
-                    .price(contract.getPrice())
-                    .startDate(today.atStartOfDay().plusDays(1))
-                    .endDate((today.atStartOfDay().plusMonths(1)))
-                    .build();
-
-            contractRepository.save(renewedContract);
-        }
-
-    }
 }

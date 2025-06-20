@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 
 	        Set<Integer> inputBitPositions = request.getTags().stream()
 	            .map(tag -> {
-	                TagMeta meta = tagMetaService.findTagMetaByDescription(tag);
+	                TagMeta meta = tagMetaService.findTagMetaByKey(tag);
 	                return meta != null ? meta.getBitPosition() : null;
 	            })
 	            .filter(Objects::nonNull)
@@ -122,7 +122,6 @@ public class UserServiceImpl implements UserService {
 	                }
 	            }
 	        }
-
 	        for (int bitPos : inputBitPositions) {
 	            tagCode |= (1L << bitPos);
 	        }

@@ -3,12 +3,14 @@ package com.archiservice.chatbot.dto.type;
 public enum MessageType {
   USER_MESSAGE,
 
+  INFO,
   SUGGESTION,
   KEYWORD_RECOMMENDATION,
   PREFERENCE_UPDATE,
   PROACTIVE_SUGGESTION,
   GENERAL_RESPONSE,
-  FILTERED_MESSAGE
+  FILTERED_MESSAGE,
+  IMAGE_ANALYSIS
 }
 
 /**

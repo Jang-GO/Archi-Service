@@ -47,4 +47,19 @@ public class CommonCodeServiceImpl implements CommonCodeService {
         return groupMap.getOrDefault(commonCode, commonCode);
     }
 
+    @Override
+    public String getCode(String groupCode, String commonName) {
+
+        ConcurrentMap<String, String> groupMap = commonCodeCache.get(groupCode);
+        if (groupMap != null) {
+            String result = groupMap.get(commonName);
+            if (result != null) {
+                return result;
+            }
+        }
+
+        return commonCodeRepository.findCommonCodeByGroupCodeAndCommonName(groupCode, commonName)
+                .orElse(null);
+    }
+
 }

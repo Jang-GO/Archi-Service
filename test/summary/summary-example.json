@@ -1,0 +1,23 @@
+{
+  "metrics": {
+    "http_req_duration": {
+      "avg": 312.4,
+      "p(95)": 580.2
+    },
+    "http_req_failed": {
+      "rate": 0
+    },
+    "http_req_count": {
+      "value": 50
+    }
+  },
+  "root_group": {
+    "checks": [
+      {
+        "name": "is status 200",
+        "passes": 50,
+        "fails": 0
+      }
+    ]
+  }
+}

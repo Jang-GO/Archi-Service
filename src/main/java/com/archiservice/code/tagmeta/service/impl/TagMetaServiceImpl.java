@@ -23,6 +23,7 @@ public class TagMetaServiceImpl implements TagMetaService {
     private final TagMetaRepository tagMetaRepository;
 
     private Map<Integer, TagMeta> tagMetaCache = new ConcurrentHashMap<>();
+    private final Map<String, TagMeta> tagMetaKeyCache = new ConcurrentHashMap<>();
 
     @EventListener(ApplicationReadyEvent.class)
     public void loadAllTagMetas() {
@@ -32,6 +33,10 @@ public class TagMetaServiceImpl implements TagMetaService {
                         TagMeta::getBitPosition,
                         Function.identity()
                 ));
+
+        allTagMetas.forEach(meta ->
+                tagMetaKeyCache.put(meta.getId().getTagKey().toLowerCase(), meta)
+        );
     }
 
     @Override
@@ -52,20 +57,29 @@ public class TagMetaServiceImpl implements TagMetaService {
                 .map(TagMeta::getTagDescription)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
-    public Long calculateTagCodeFromDescriptions(List<String> tagDescriptions) {
-        if (tagDescriptions == null || tagDescriptions.isEmpty()) {
-            return 0L;
+    public Long calculateTagCodeFromKey(List<String> tagKeys) {
+        if (tagKeys == null || tagKeys.isEmpty()) {
+            throw new IllegalArgumentException("태그 리스트가 비어 있습니다.");
         }
 
-        return tagDescriptions.stream()
-                .map(this::findTagMetaByDescription)
+        List<TagMeta> tagMetas = tagKeys.stream()
+                .map(this::findTagMetaByKey)
                 .filter(Objects::nonNull)
+                .toList();
+
+        if (tagMetas.isEmpty()) {
+            throw new IllegalArgumentException("유효한 태그가 하나도 없습니다.");
+        }
+
+        return tagMetas.stream()
                 .map(TagMeta::getBitPosition)
                 .map(position -> 1L << position)
                 .reduce(0L, (a, b) -> a | b);
     }
+
+
 
 
     private List<Integer> getActiveBitPositions(Long tagCode) {
@@ -79,12 +93,11 @@ public class TagMetaServiceImpl implements TagMetaService {
 
         return positions;
     }
-    
+  
     @Override
-    public TagMeta findTagMetaByDescription(String description) {
-        return tagMetaCache.values().stream()
-                .filter(meta -> description.equals(meta.getTagDescription()))
-                .findFirst()
-                .orElse(null);
+    private TagMeta findTagMetaByKey(String key) {
+        return tagMetaKeyCache.get(key.toLowerCase());
     }
+
+
 }

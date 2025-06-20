@@ -42,5 +42,4 @@ public class RecommendController {
     public ResponseEntity<ApiResponse<RecommendCouponResponseDto>> recommendCoupon(@AuthenticationPrincipal CustomUser customUser){
         return ResponseEntity.ok(ApiResponse.success("쿠폰 추천 성공", recommendService.recommendCoupon(customUser)));
     }
-
 }

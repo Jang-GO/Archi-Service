@@ -55,4 +55,9 @@ public class AIConfig {
                 .defaultSystem(new ClassPathResource("prompts/review-summary-rule-prompt.txt"))
                 .build();
     }
+
+    @Bean
+    ChatClient bannerClient(ChatClient.Builder builder) {
+        return builder.build();
+    }
 }

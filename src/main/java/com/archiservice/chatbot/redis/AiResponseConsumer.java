@@ -12,14 +12,13 @@ import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.stream.StreamMessageListenerContainer;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class RedisStreamConsumer {
+public class AiResponseConsumer {
 
   private final AiService aiService;
   private final StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamContainer;

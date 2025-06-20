@@ -53,8 +53,8 @@ public class RecommendServiceImpl implements RecommendService {
     private final PlanReviewService planReviewService;
     private final VasReviewService vasReviewService;
     private final CouponReviewService couponReviewService;
-    
-    
+
+
 
     public RecommendServiceImpl(@Qualifier("recommendChatClient") ChatClient recommendChatClient, TagMetaService tagMetaService,
 			PlanRepository planRepository, VasRepository vasRepository, PlanReviewRepository planReviewRepository,

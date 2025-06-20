@@ -8,6 +8,6 @@ import com.archiservice.code.tagmeta.domain.TagMeta;
 
 public interface TagMetaService {
     List<String> extractTagsFromCode(Long tagCode);
-    Long calculateTagCodeFromDescriptions(List<String> tagDescriptions);
-    public TagMeta findTagMetaByDescription(String description);
+    TagMeta findTagMetaByKey(String description);
+    Long calculateTagCodeFromKey(List<String> tagKeys);
 }

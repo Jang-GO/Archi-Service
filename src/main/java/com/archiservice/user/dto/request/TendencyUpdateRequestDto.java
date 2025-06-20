@@ -10,6 +10,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class TendencyUpdateRequestDto {
-	private List<String> tagCodes;
+	private List<String> tags;
     private Long tagCode;
 }

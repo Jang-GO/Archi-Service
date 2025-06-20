@@ -1,14 +1,18 @@
 package com.archiservice.user.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.archiservice.code.tagmeta.domain.TagMeta;
 import com.archiservice.code.tagmeta.service.TagMetaService;
 import com.archiservice.common.jwt.JwtUtil;
-import com.archiservice.common.jwt.RefreshTokenService;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.business.InvalidPasswordException;
 import com.archiservice.exception.business.UserNotFoundException;
@@ -86,8 +90,42 @@ public class UserServiceImpl implements UserService {
 
 		if (request.getTagCode() != null) {
 	        tagCode = request.getTagCode();
-	    } else if (request.getTagCodes() != null && !request.getTagCodes().isEmpty()) {
-	        tagCode = tagMetaService.calculateTagCodeFromKey(request.getTagCodes());
+	    } else if (request.getTags() != null && !request.getTags().isEmpty()) {
+	    	tagCode = user.getTagCode() != null ? user.getTagCode() : 0L;
+
+	        int[][] categories = {
+	            {9, 19},
+	            {20, 26},
+	            {27, 33},
+	            {34, 42},
+	            {43, 53}
+	        };
+
+	        Set<Integer> inputBitPositions = request.getTags().stream()
+	            .map(tag -> {
+	                TagMeta meta = tagMetaService.findTagMetaByDescription(tag);
+	                return meta != null ? meta.getBitPosition() : null;
+	            })
+	            .filter(Objects::nonNull)
+	            .collect(Collectors.toSet());
+
+	        Set<Integer> clearedCategories = new HashSet<>();
+	        for (int bitPos : inputBitPositions) {
+	            for (int i = 0; i < categories.length; i++) {
+	                if (bitPos >= categories[i][0] && bitPos <= categories[i][1]) {
+	                    if (clearedCategories.add(i)) {
+	                        for (int j = categories[i][0]; j <= categories[i][1]; j++) {
+	                            tagCode &= ~(1L << j);
+	                        }
+	                    }
+	                    break;
+	                }
+	            }
+	        }
+
+	        for (int bitPos : inputBitPositions) {
+	            tagCode |= (1L << bitPos);
+	        }
 	    } else {
 	        throw new IllegalArgumentException("태그 정보가 유효하지 않습니다.");
 	    }

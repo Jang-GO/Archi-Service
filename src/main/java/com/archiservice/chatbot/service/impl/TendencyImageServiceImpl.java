@@ -134,7 +134,10 @@ public class TendencyImageServiceImpl implements TendencyImageService {
       }
 
       if (!tagList.isEmpty()) {
-        ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, rawTags);
+
+        String tagMessage = "사용자님에게 추천드리는 태그는 [ " + String.join(", ", tagList) + " ] 입니다.";
+
+        ChatMessageDto tagsMsg = ChatMessageDto.ofTags(userId, tagMessage);
 
         Chat tagsChat = Chat.builder()
                 .user(user)
@@ -152,7 +155,7 @@ public class TendencyImageServiceImpl implements TendencyImageService {
         );
 
         TendencyUpdateRequestDto tendencyUpdateRequestDto = new TendencyUpdateRequestDto();
-        tendencyUpdateRequestDto.setTagCodes(tagList);
+        tendencyUpdateRequestDto.setTags(tagList);
 
         userService.updateTendency(tendencyUpdateRequestDto, new CustomUser(user));
       }

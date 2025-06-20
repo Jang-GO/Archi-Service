@@ -93,8 +93,9 @@ public class TagMetaServiceImpl implements TagMetaService {
 
         return positions;
     }
-
-    private TagMeta findTagMetaByKey(String key) {
+  
+    @Override
+    public TagMeta findTagMetaByKey(String key) {
         return tagMetaKeyCache.get(key.toLowerCase());
     }
 

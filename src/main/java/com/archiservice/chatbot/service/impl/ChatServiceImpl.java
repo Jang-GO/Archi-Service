@@ -105,5 +105,7 @@ public class ChatServiceImpl implements ChatService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
         chatRepository.deleteByUser_UserId(userId);
+        String key = "chat:user:" + userId;
+        chatMessageRedisTemplate.delete(key);
     }
 }

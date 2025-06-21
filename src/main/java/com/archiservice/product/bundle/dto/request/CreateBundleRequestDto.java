@@ -1,7 +1,9 @@
 package com.archiservice.product.bundle.dto.request;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @Getter
 public class CreateBundleRequestDto {
     private Long planId;

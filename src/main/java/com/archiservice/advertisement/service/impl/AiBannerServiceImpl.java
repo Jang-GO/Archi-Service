@@ -17,7 +17,10 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -107,9 +110,7 @@ public class AiBannerServiceImpl implements AiBannerService {
     @Override
     public BannerResponseDto generateBanner(BannerRequestDto request) {
         try {
-            String fileName = "prompts/Banner_Prompt.txt";
-            Path promptPath = new ClassPathResource(fileName).getFile().toPath();
-            String promptTemplate = Files.readString(promptPath, StandardCharsets.UTF_8);
+            String promptTemplate = readPromptFile();
 
             return bannerClient.prompt()
                     .system(promptTemplate)
@@ -122,6 +123,13 @@ public class AiBannerServiceImpl implements AiBannerService {
                     .entity(BannerResponseDto.class);
         } catch (Exception e) {
             throw new RuntimeException("배너 생성 중 오류가 발생했습니다", e);
+        }
+    }
+
+    private String readPromptFile() throws IOException {
+        ClassPathResource resource = new ClassPathResource("prompts/Banner_Prompt.txt");
+        try (InputStream inputStream = resource.getInputStream()) {
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
         }
     }
 }

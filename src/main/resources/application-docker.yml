@@ -89,6 +89,7 @@ tag:
     #
     photo: Photo
     #
+    life: Life
     living: Life
     shopping: Life
     store: Life
@@ -114,11 +115,12 @@ tag:
     #
     youtube: Youtube
     #
-    baseball: Hobby # 부가서비스에 인터파크 추가예정
+    hobby: Hobby
+    baseball: Hobby
     soccer: Hobby
     game: Hobby
     #
-    cafe: Cafe
+    cafe : Cafe
     coffee: Cafe
     bread: Cafe
     #

@@ -18,11 +18,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -49,17 +50,22 @@ public class AiBannerServiceImpl implements AiBannerService {
         this.bannerClient = bannerClient;
     }
 
-    // 애플리케이션 시작 시 프롬프트 파일을 메모리에 로드
     @EventListener(ApplicationReadyEvent.class)
     public void loadPromptTemplate() {
         try {
             String fileName = "prompts/Banner_Prompt.txt";
-            Path promptPath = new ClassPathResource(fileName).getFile().toPath();
-            this.promptTemplate = Files.readString(promptPath, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("프롬프트 템플릿 로딩 중 오류가 발생했습니다", e);
+
+            Resource resource = new ClassPathResource(fileName);
+            this.promptTemplate = StreamUtils.copyToString(
+                    resource.getInputStream(),
+                    StandardCharsets.UTF_8
+            );
+
+        } catch (IOException e) {
+            throw new RuntimeException("프롬프트 불러오기 실패");
         }
     }
+
 
     @Override
     public BannerResponseDto getBanner(CustomUser customUser) {

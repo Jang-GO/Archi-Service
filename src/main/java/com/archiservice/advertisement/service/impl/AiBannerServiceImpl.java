@@ -24,8 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AiBannerServiceImpl implements AiBannerService {
@@ -106,14 +105,13 @@ public class AiBannerServiceImpl implements AiBannerService {
 
         List<String> subTagsOnly = selectableTags.stream()
                 .filter(tag -> !tagMapping.getMainTags().contains(tag))
-                .collect(Collectors.toList());
+                .toList();
 
         if (subTagsOnly.isEmpty()) {
             return "";
         }
 
-        Random random = new Random();
-        int randomIndex = random.nextInt(selectableTags.size());
+        int randomIndex = ThreadLocalRandom.current().nextInt(selectableTags.size());
 
         return selectableTags.get(randomIndex);
     }

@@ -36,6 +36,7 @@ public class TagConverter {
         // Photo
         korToEng.put("사진", "photo");
         // Life
+        korToEng.put("생활", "life");
         korToEng.put("자취", "living");
         korToEng.put("쇼핑", "shopping");
         korToEng.put("편의점", "store");
@@ -61,6 +62,7 @@ public class TagConverter {
         // Youtube
         korToEng.put("유튜브", "youtube");
         // Hobby
+        korToEng.put("취미", "hobby");
         korToEng.put("야구", "baseball");
         korToEng.put("축구", "soccer");
         korToEng.put("게임", "game");

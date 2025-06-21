@@ -1,0 +1,183 @@
+{
+    "root_group": {
+        "groups": {},
+        "checks": {
+                "plans status is 200": {
+                    "passes": 4126,
+                    "fails": 0,
+                    "name": "plans status is 200",
+                    "path": "::plans status is 200",
+                    "id": "8d08c2c6ec87767857070e63fcc5c100"
+                },
+                "plans response time < 500ms": {
+                    "name": "plans response time < 500ms",
+                    "path": "::plans response time < 500ms",
+                    "id": "370d6e1f57c4c62cd10b0dc0634c6eb9",
+                    "passes": 4052,
+                    "fails": 74
+                },
+                "plans response time < 1000ms": {
+                    "name": "plans response time < 1000ms",
+                    "path": "::plans response time < 1000ms",
+                    "id": "f707bdacf96d0578e16f3f5a35e0a496",
+                    "passes": 4098,
+                    "fails": 28
+                },
+                "vass status is 200": {
+                    "name": "vass status is 200",
+                    "path": "::vass status is 200",
+                    "id": "7da3e82e1d98afdad0313f89e25a91ce",
+                    "passes": 4126,
+                    "fails": 0
+                },
+                "vass response time < 500ms": {
+                    "name": "vass response time < 500ms",
+                    "path": "::vass response time < 500ms",
+                    "id": "0faf8c96a2bfb48cfc1b6522c35484f6",
+                    "passes": 4093,
+                    "fails": 33
+                },
+                "vass response time < 1000ms": {
+                    "name": "vass response time < 1000ms",
+                    "path": "::vass response time < 1000ms",
+                    "id": "3316ab76cf753b61c4806e76e736ab62",
+                    "passes": 4119,
+                    "fails": 7
+                },
+                "coupons status is 200": {
+                    "name": "coupons status is 200",
+                    "path": "::coupons status is 200",
+                    "id": "9ef638af5ed80da5b3031dba4ee2b2be",
+                    "passes": 4126,
+                    "fails": 0
+                },
+                "coupons response time < 500ms": {
+                    "passes": 4084,
+                    "fails": 42,
+                    "name": "coupons response time < 500ms",
+                    "path": "::coupons response time < 500ms",
+                    "id": "3cd74cc20dbff1822ff2e5e07ee76006"
+                },
+                "coupons response time < 1000ms": {
+                    "passes": 4119,
+                    "fails": 7,
+                    "name": "coupons response time < 1000ms",
+                    "path": "::coupons response time < 1000ms",
+                    "id": "6ab51dce56b8f49f9ba1718c63b844cc"
+                }
+            },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "metrics": {
+        "iterations": {
+            "count": 4126,
+            "rate": 15.241963719597438
+        },
+        "data_received": {
+            "count": 52571285,
+            "rate": 194204.94877911222
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 84.74439289238994,
+            "min": 4.778862,
+            "med": 44.732171,
+            "max": 2702.109827,
+            "p(90)": 186.7748802,
+            "p(95)": 264.86570894999994
+        },
+        "http_req_sending": {
+            "avg": 0.10858686621425138,
+            "min": 0.004302,
+            "med": 0.029913,
+            "max": 112.348325,
+            "p(90)": 0.0846379,
+            "p(95)": 0.12748584999999993
+        },
+        "http_reqs": {
+            "count": 12378,
+            "rate": 45.725891158792315
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 50
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 12378,
+            "value": 0
+        },
+        "checks": {
+            "passes": 36943,
+            "fails": 191,
+            "value": 0.9948564657726073
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0
+        },
+        "http_req_waiting": {
+            "avg": 81.24747595459672,
+            "min": 4.645908,
+            "med": 43.100321,
+            "max": 2684.544956,
+            "p(90)": 181.97382700000003,
+            "p(95)": 261.2166892499997
+        },
+        "vus_max": {
+            "min": 50,
+            "max": 50,
+            "value": 50
+        },
+        "http_req_receiving": {
+            "avg": 3.388330071578594,
+            "min": 0.021709,
+            "med": 0.5068524999999999,
+            "max": 2323.319112,
+            "p(90)": 3.9584762000000016,
+            "p(95)": 9.956243999999987
+        },
+        "http_req_connecting": {
+            "avg": 0.04310296186783001,
+            "min": 0,
+            "med": 0,
+            "max": 110.581007,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "data_sent": {
+            "count": 932476,
+            "rate": 3444.683800629021
+        },
+        "http_req_blocked": {
+            "p(90)": 0.018808,
+            "p(95)": 0.037129849999999964,
+            "avg": 0.08303854104055693,
+            "min": 0.001901,
+            "med": 0.009704,
+            "max": 247.777744
+        },
+        "http_req_duration": {
+            "avg": 84.74439289238994,
+            "min": 4.778862,
+            "med": 44.732171,
+            "max": 2702.109827,
+            "p(90)": 186.7748802,
+            "p(95)": 264.86570894999994
+        },
+        "iteration_duration": {
+            "min": 1021.626777,
+            "med": 1158.0308315000002,
+            "max": 3925.421566,
+            "p(90)": 1583.363569,
+            "p(95)": 1781.06564875,
+            "avg": 1262.5206248087757
+        }
+    }
+}

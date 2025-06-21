@@ -15,6 +15,8 @@ import com.archiservice.user.repository.UserRepository;
 import com.archiservice.advertisement.service.AiBannerService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,8 @@ public class AiBannerServiceImpl implements AiBannerService {
     private final TagConverter tagConverter;
     private final ChatClient bannerClient;
 
+    private String promptTemplate;
+
     public AiBannerServiceImpl(UserRepository userRepository, TagMetaService tagMetaService, CommonCodeService commonCodeService, VasService vasService, TagMappingComponent tagMapping, TagConverter tagConverter, @Qualifier("bannerClient") ChatClient bannerClient) {
         this.userRepository = userRepository;
         this.tagMetaService = tagMetaService;
@@ -44,6 +48,18 @@ public class AiBannerServiceImpl implements AiBannerService {
         this.tagMapping = tagMapping;
         this.tagConverter = tagConverter;
         this.bannerClient = bannerClient;
+    }
+
+    // 애플리케이션 시작 시 프롬프트 파일을 메모리에 로드
+    @EventListener(ApplicationReadyEvent.class)
+    public void loadPromptTemplate() {
+        try {
+            String fileName = "prompts/Banner_Prompt.txt";
+            Path promptPath = new ClassPathResource(fileName).getFile().toPath();
+            this.promptTemplate = Files.readString(promptPath, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException("프롬프트 템플릿 로딩 중 오류가 발생했습니다", e);
+        }
     }
 
     @Override
@@ -70,9 +86,7 @@ public class AiBannerServiceImpl implements AiBannerService {
                 .vasDescription(selectedVas.getVasDescription())
                 .build();
 
-        BannerResponseDto bannerResult = generateBanner(request);
-
-        return bannerResult;
+        return generateBanner(request);
     }
 
     @Override
@@ -107,10 +121,6 @@ public class AiBannerServiceImpl implements AiBannerService {
     @Override
     public BannerResponseDto generateBanner(BannerRequestDto request) {
         try {
-            String fileName = "prompts/Banner_Prompt.txt";
-            Path promptPath = new ClassPathResource(fileName).getFile().toPath();
-            String promptTemplate = Files.readString(promptPath, StandardCharsets.UTF_8);
-
             return bannerClient.prompt()
                     .system(promptTemplate)
                     .user(u -> u.text("vasId = {vasId} 유지하고, 서브태그: {subTag}, 상품명: {vasName}에 맞는 배너를 생성해주세요")

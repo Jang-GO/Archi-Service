@@ -1,5 +1,5 @@
 package com.archiservice.advertisement.service.impl;
-
+import java.io.InputStream;
 import com.archiservice.code.commoncode.service.CommonCodeService;
 import com.archiservice.code.tagmeta.service.TagMetaService;
 import com.archiservice.common.security.CustomUser;

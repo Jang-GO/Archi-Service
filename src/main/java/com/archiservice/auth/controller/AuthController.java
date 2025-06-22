@@ -29,7 +29,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<RefreshResponseDto>> refresh(@RequestHeader("Authorization") String refreshToken, @AuthenticationPrincipal CustomUser customUser) {
+    public ResponseEntity<ApiResponse<RefreshResponseDto>> refresh(@CookieValue("refreshToken") String refreshToken) {
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 

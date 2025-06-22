@@ -6,6 +6,6 @@ services:
       - .:/scripts
     working_dir: /scripts
     environment:
-      - SCRIPT=register.sample.js
+      - SCRIPT=${SCRIPT:-register.sample.js}
     command: run --summary-export=/scripts/summary/summary.json $SCRIPT
     network_mode: host

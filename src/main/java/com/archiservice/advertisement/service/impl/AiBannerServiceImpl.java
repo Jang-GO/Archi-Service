@@ -15,18 +15,19 @@ import com.archiservice.user.repository.UserRepository;
 import com.archiservice.advertisement.service.AiBannerService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AiBannerServiceImpl implements AiBannerService {
@@ -39,6 +40,8 @@ public class AiBannerServiceImpl implements AiBannerService {
     private final TagConverter tagConverter;
     private final ChatClient bannerClient;
 
+    private String promptTemplate;
+
     public AiBannerServiceImpl(UserRepository userRepository, TagMetaService tagMetaService, CommonCodeService commonCodeService, VasService vasService, TagMappingComponent tagMapping, TagConverter tagConverter, @Qualifier("bannerClient") ChatClient bannerClient) {
         this.userRepository = userRepository;
         this.tagMetaService = tagMetaService;
@@ -48,6 +51,34 @@ public class AiBannerServiceImpl implements AiBannerService {
         this.tagConverter = tagConverter;
         this.bannerClient = bannerClient;
     }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void loadPromptTemplate() {
+        try {
+            String fileName = "prompts/Banner_Prompt.txt";
+
+            Resource resource = new ClassPathResource(fileName);
+            this.promptTemplate = StreamUtils.copyToString(
+                    resource.getInputStream(),
+                    StandardCharsets.UTF_8
+            );
+
+        } catch (IOException e) {
+            throw new RuntimeException("프롬프트 불러오기 실패");
+        }
+    }
+
+    @Async("bannerExecutor")
+    public CompletableFuture<BannerResponseDto> getBannerAsync(CustomUser customUser) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return getBanner(customUser);
+            } catch (Exception e) {
+                throw new RuntimeException("배너 생성 실패", e);
+            }
+        });
+    }
+
 
     @Override
     public BannerResponseDto getBanner(CustomUser customUser) {
@@ -73,9 +104,7 @@ public class AiBannerServiceImpl implements AiBannerService {
                 .vasDescription(selectedVas.getVasDescription())
                 .build();
 
-        BannerResponseDto bannerResult = generateBanner(request);
-
-        return bannerResult;
+        return generateBanner(request);
     }
 
     @Override
@@ -95,14 +124,13 @@ public class AiBannerServiceImpl implements AiBannerService {
 
         List<String> subTagsOnly = selectableTags.stream()
                 .filter(tag -> !tagMapping.getMainTags().contains(tag))
-                .collect(Collectors.toList());
+                .toList();
 
         if (subTagsOnly.isEmpty()) {
             return "";
         }
 
-        Random random = new Random();
-        int randomIndex = random.nextInt(selectableTags.size());
+        int randomIndex = ThreadLocalRandom.current().nextInt(selectableTags.size());
 
         return selectableTags.get(randomIndex);
     }
@@ -110,8 +138,6 @@ public class AiBannerServiceImpl implements AiBannerService {
     @Override
     public BannerResponseDto generateBanner(BannerRequestDto request) {
         try {
-            String promptTemplate = readPromptFile();
-
             return bannerClient.prompt()
                     .system(promptTemplate)
                     .user(u -> u.text("vasId = {vasId} 유지하고, 서브태그: {subTag}, 상품명: {vasName}에 맞는 배너를 생성해주세요")

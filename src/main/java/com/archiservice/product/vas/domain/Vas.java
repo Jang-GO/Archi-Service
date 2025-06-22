@@ -50,7 +50,6 @@ public class Vas extends TimeStamp {
         return saleRate != null && saleRate > 0;
     }
 
-    // 기존 코드 호환성을 위한 메서드
     public Integer getPriceAsInteger() {
         return price.getAmount();
     }

@@ -29,7 +29,6 @@ public class Money {
         );
         BigDecimal discounted = amount.multiply(discountMultiplier);
 
-        // 10원 단위로 반올림
         BigDecimal rounded = discounted.divide(new BigDecimal(10), 0, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal(10));
 

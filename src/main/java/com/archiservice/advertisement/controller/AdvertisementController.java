@@ -26,7 +26,6 @@ public class AdvertisementController {
   private final AdvertisementService advertisementService;
   private final AiBannerService aiBannerService;
 
-  // 배너 결과 캐시 (실제로는 Redis 사용 권장)
   private final Map<String, BannerResponseDto> bannerCache = new ConcurrentHashMap<>();
   private final Map<String, String> bannerStatus = new ConcurrentHashMap<>();
 
@@ -101,8 +100,4 @@ public class AdvertisementController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-//  @GetMapping("/ad-banner")
-//  public ResponseEntity<ApiResponse<BannerResponseDto>> getAdBanner(@AuthenticationPrincipal CustomUser user) {
-//    return ResponseEntity.ok(ApiResponse.success(aiBannerService.getBanner(user)));
-//  }
 }

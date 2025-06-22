@@ -151,4 +151,11 @@ public class AiBannerServiceImpl implements AiBannerService {
             throw new RuntimeException("배너 생성 중 오류가 발생했습니다", e);
         }
     }
+
+    private String readPromptFile() throws IOException {
+        ClassPathResource resource = new ClassPathResource("prompts/Banner_Prompt.txt");
+        try (InputStream inputStream = resource.getInputStream()) {
+            return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+        }
+    }
 }

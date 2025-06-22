@@ -60,7 +60,7 @@ public class ProductBundleServiceImpl implements ProductBundleService {
         Coupon coupon = couponRepository.findById(requestDto.getCouponId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "라이프혜택을 찾을 수 없음"));
 
-        long finalPrice = plan.getPrice() + vas.getDiscountedPrice() + coupon.getPrice();
+        long finalPrice = plan.getPrice() + vas.getDiscountedPriceAsInteger() + coupon.getPrice();
 
         Optional<ProductBundle> optBundle = productBundleRepository.findByPlanAndVasAndCoupon(plan, vas, coupon);
 

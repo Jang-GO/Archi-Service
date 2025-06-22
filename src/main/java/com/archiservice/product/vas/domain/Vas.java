@@ -20,12 +20,12 @@ public class Vas extends TimeStamp {
     @Column(name = "vas_name")
     private String vasName;
 
-    @Column(name = "price")
-    private Integer price;
+    @Embedded
+    @AttributeOverride(name = "amount", column = @Column(name = "price"))
+    private Money price;
 
     @Column(name = "image_url")
     private String imageUrl;
-
 
     @Column(name = "vas_description")
     private String vasDescription;
@@ -39,14 +39,22 @@ public class Vas extends TimeStamp {
     @Column(name = "category_code", length = 3)
     private String categoryCode;
 
-    public Integer getDiscountedPrice() {
+    public Money getDiscountedPrice() {
         if (saleRate == null || saleRate == 0) {
             return price;
         }
-        return price - (price * saleRate / 100);
+        return price.applyDiscount(saleRate);
     }
 
     public boolean isOnSale() {
         return saleRate != null && saleRate > 0;
+    }
+
+    public Integer getPriceAsInteger() {
+        return price.getAmount();
+    }
+
+    public Integer getDiscountedPriceAsInteger() {
+        return getDiscountedPrice().getAmount();
     }
 }

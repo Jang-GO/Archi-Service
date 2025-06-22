@@ -19,12 +19,14 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -64,6 +66,17 @@ public class AiBannerServiceImpl implements AiBannerService {
         } catch (IOException e) {
             throw new RuntimeException("프롬프트 불러오기 실패");
         }
+    }
+
+    @Async("bannerExecutor")
+    public CompletableFuture<BannerResponseDto> getBannerAsync(CustomUser customUser) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return getBanner(customUser);
+            } catch (Exception e) {
+                throw new RuntimeException("배너 생성 실패", e);
+            }
+        });
     }
 
 

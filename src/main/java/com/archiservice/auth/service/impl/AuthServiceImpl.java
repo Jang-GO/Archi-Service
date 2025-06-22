@@ -9,6 +9,9 @@ import com.archiservice.common.jwt.RefreshTokenService;
 import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.common.jwt.JwtUtil;
+import com.archiservice.common.security.CustomUserDetailsService;
+import com.archiservice.exception.BusinessException;
+import com.archiservice.exception.ErrorCode;
 import com.archiservice.exception.business.InvalidPasswordException;
 import com.archiservice.exception.business.InvalidTokenException;
 import com.archiservice.exception.business.UserNotFoundException;
@@ -33,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     public ApiResponse<LoginResponseDto> login(LoginRequestDto loginRequest, HttpServletResponse response) {
@@ -60,15 +64,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<RefreshResponseDto> refresh(String refreshTokenHeader) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        
-        Long userId = customUser.getId();
+    public ApiResponse<RefreshResponseDto> refresh(String refreshToken) {
+
+        Long userId = jwtUtil.extractUserId(refreshToken);
+
+        if (!refreshTokenService.validateRefreshToken(userId, refreshToken)) {
+            throw new InvalidTokenException("Invalid refresh token");
+        }
+
+        CustomUser customUser = customUserDetailsService.loadUserByUserId(userId);
+
         String newAccessToken = jwtUtil.generateAccessToken(customUser);
 
         RefreshResponseDto responseDto = new RefreshResponseDto(userId, newAccessToken);
-
         return ApiResponse.success("재발급 완료", responseDto);
     }
 

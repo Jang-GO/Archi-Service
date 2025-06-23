@@ -18,6 +18,7 @@ public class ContractDetailResponseDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
+    private Long planId;
     private String planName;
     private int planPrice;
     private String planCategory;
@@ -25,13 +26,16 @@ public class ContractDetailResponseDto {
     private String callUsage;
     private String messageUsage;
 
+    private Long vasId;
     private String vasName;
     private Money vasPrice;
     private String vasCategory;
     private String vasDescription;
     private Integer saleRate;
 
+    private Long couponId;
     private String couponName;
     private Integer couponPrice;
     private String couponCategory;
+
 }

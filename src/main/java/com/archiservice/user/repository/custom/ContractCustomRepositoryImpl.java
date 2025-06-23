@@ -20,13 +20,13 @@ public class ContractCustomRepositoryImpl implements ContractCustomRepository {
         String jpql = "SELECT new com.archiservice.user.dto.response.ContractDetailResponseDto(" +
                 "c.paymentMethod, c.price, c.startDate, c.endDate, " +
 
-                "pb.plan.planName, pb.plan.price, pb.plan.categoryCode, " +
+                "pb.plan.planId, pb.plan.planName, pb.plan.price, pb.plan.categoryCode, " +
                 "pb.plan.monthData, pb.plan.callUsage, pb.plan.messageUsage, " +
 
-                "pb.vas.vasName, pb.vas.price, pb.vas.categoryCode, " +
+                "pb.vas.vasId , pb.vas.vasName, pb.vas.price, pb.vas.categoryCode, " +
                 "pb.vas.vasDescription, pb.vas.saleRate, " +
 
-                "pb.coupon.couponName, pb.coupon.price, " +
+                "pb.coupon.couponId , pb.coupon.couponName, pb.coupon.price, " +
                 "pb.coupon.categoryCode " +
                 ") " +
                 "FROM Contract c " +

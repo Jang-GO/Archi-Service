@@ -34,8 +34,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<LogoutResponseDto>> logout(@RequestHeader("Authorization") String accessToken) {
-        return ResponseEntity.ok(authService.logout(accessToken));
+    public ResponseEntity<ApiResponse<LogoutResponseDto>> logout(@RequestHeader("Authorization") String accessToken, HttpServletResponse response) {
+        return ResponseEntity.ok(authService.logout(accessToken, response));
     }
 
     @GetMapping("/hash/{password}")

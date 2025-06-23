@@ -41,11 +41,12 @@ public class VasReview extends TimeStamp {
     private Boolean isModerated = false;
 
     @Builder
-    public VasReview(User user, Vas vas, Integer score, String content) {
+    public VasReview(User user, Vas vas, Integer score, String content, boolean isModerated) {
         this.user = user;
         this.vas = vas;
         this.score = score;
         this.content = content;
+        this.isModerated = isModerated;
     }
 
     public void updateReview(Integer score, String content) {

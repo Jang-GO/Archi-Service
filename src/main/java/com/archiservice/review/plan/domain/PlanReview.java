@@ -40,11 +40,12 @@ public class PlanReview extends TimeStamp {
     private Boolean isModerated = false;
 
     @Builder
-    public PlanReview(User user, Plan plan, Integer score, String content) {
+    public PlanReview(User user, Plan plan, Integer score, String content, boolean isModerated) {
         this.user = user;
         this.plan = plan;
         this.score = score;
         this.content = content;
+        this.isModerated = isModerated;
     }
 
     public void updateReview(Integer score, String content) {

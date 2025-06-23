@@ -51,6 +51,7 @@ public class VasReviewServiceImpl implements VasReviewService {
                 .vas(vas)
                 .score(requestDto.getScore())
                 .content(requestDto.getContent())
+                .isModerated(false)
                 .build();
 
         VasReview savedReview = vasReviewRepository.save(review);

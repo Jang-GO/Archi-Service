@@ -51,6 +51,7 @@ public class CouponReviewServiceImpl implements CouponReviewService {
                 .coupon(coupon)
                 .score(requestDto.getScore())
                 .content(requestDto.getContent())
+                .isModerated(false)
                 .build();
 
         CouponReview savedReview = couponReviewRepository.save(review);

@@ -40,11 +40,12 @@ public class CouponReview extends TimeStamp {
     private Boolean isModerated = false;
 
     @Builder
-    public CouponReview(User user, Coupon coupon, Integer score, String content) {
+    public CouponReview(User user, Coupon coupon, Integer score, String content, boolean isModerated) {
         this.user = user;
         this.coupon = coupon;
         this.score = score;
         this.content = content;
+        this.isModerated = isModerated;
     }
 
     public void updateReview(Integer score, String content) {

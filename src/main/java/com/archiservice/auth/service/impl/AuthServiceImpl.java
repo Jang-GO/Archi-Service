@@ -92,6 +92,11 @@ public class AuthServiceImpl implements AuthService {
         Long userId = jwtUtil.extractUserId(accessToken);
 
         refreshTokenService.deleteRefreshToken(userId);
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
 
         LogoutResponseDto dto = new LogoutResponseDto(userId);
 

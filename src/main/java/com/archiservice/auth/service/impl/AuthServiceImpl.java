@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<LogoutResponseDto> logout(String accessTokenHeader) {
+    public ApiResponse<LogoutResponseDto> logout(String accessTokenHeader, HttpServletResponse response) {
 
         if (accessTokenHeader == null || !accessTokenHeader.startsWith("Bearer ")) {
             throw new InvalidTokenException("유효하지 않은 토큰 형식입니다");

@@ -55,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
 
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
 
         LoginResponseDto dto = LoginResponseDto.of(user.getEmail(), accessToken);

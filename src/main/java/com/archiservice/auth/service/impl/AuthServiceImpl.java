@@ -55,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
 
         Cookie cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
 
         LoginResponseDto dto = LoginResponseDto.of(user.getEmail(), accessToken);
@@ -81,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public ApiResponse<LogoutResponseDto> logout(String accessTokenHeader) {
+    public ApiResponse<LogoutResponseDto> logout(String accessTokenHeader, HttpServletResponse response) {
 
         if (accessTokenHeader == null || !accessTokenHeader.startsWith("Bearer ")) {
             throw new InvalidTokenException("유효하지 않은 토큰 형식입니다");
@@ -91,6 +92,11 @@ public class AuthServiceImpl implements AuthService {
         Long userId = jwtUtil.extractUserId(accessToken);
 
         refreshTokenService.deleteRefreshToken(userId);
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
 
         LogoutResponseDto dto = new LogoutResponseDto(userId);
 

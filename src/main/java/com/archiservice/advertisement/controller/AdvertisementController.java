@@ -38,7 +38,7 @@ public class AdvertisementController {
 
     // 비동기로 배너 생성 시작
     aiBannerService.getBannerAsync(user)
-            .orTimeout(10, TimeUnit.DAYS.SECONDS) // 10초 타임아웃
+            .orTimeout(20, TimeUnit.DAYS.SECONDS)
             .thenAccept(banner -> {
               bannerCache.put(taskId, banner);
               bannerStatus.put(taskId, "COMPLETED");

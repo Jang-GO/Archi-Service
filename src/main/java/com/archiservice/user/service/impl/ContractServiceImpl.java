@@ -104,8 +104,11 @@ public class ContractServiceImpl implements ContractService {
     public List<ContractDetailResponseDto> getContract(Period period, CustomUser customUser) {
         User user = userRepository.findById(customUser.getId())
                 .orElseThrow(() -> new UserNotFoundException());
-
+        System.out.println( "사용자-> "+ user.getUserId());
         List<ContractDetailResponseDto> contractDetailResponseListDto = contractCustomRepository.findContractByOffset(user, period);
+        for (ContractDetailResponseDto contractDetailResponseDto : contractDetailResponseListDto) {
+            System.out.println("테스트: "+ contractDetailResponseDto);
+        }
 
         return contractDetailResponseListDto;
     }

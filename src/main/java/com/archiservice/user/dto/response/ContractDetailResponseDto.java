@@ -1,18 +1,24 @@
 package com.archiservice.user.dto.response;
 
+import com.archiservice.product.vas.domain.Money;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Builder
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class ContractDetailResponseDto {
     private String paymentMethod;
     private long contractPrice;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
+    private Long planId;
     private String planName;
     private int planPrice;
     private String planCategory;
@@ -20,13 +26,16 @@ public class ContractDetailResponseDto {
     private String callUsage;
     private String messageUsage;
 
+    private Long vasId;
     private String vasName;
-    private Integer vasPrice;
+    private Money vasPrice;
     private String vasCategory;
     private String vasDescription;
     private Integer saleRate;
 
+    private Long couponId;
     private String couponName;
     private Integer couponPrice;
     private String couponCategory;
+
 }

@@ -53,6 +53,7 @@ public class PlanReviewServiceImpl implements PlanReviewService {
                 .plan(plan)
                 .score(requestDto.getScore())
                 .content(requestDto.getContent())
+                .isModerated(false)
                 .build();
 
         PlanReview savedReview = planReviewRepository.save(review);

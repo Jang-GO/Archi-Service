@@ -1,6 +1,7 @@
 package com.archiservice.review.plan.repository;
 
 import com.archiservice.product.plan.domain.Plan;
+import com.archiservice.review.coupon.domain.CouponReview;
 import com.archiservice.review.plan.domain.PlanReview;
 import com.archiservice.user.domain.User;
 import org.springframework.data.domain.Page;
@@ -13,15 +14,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PlanReviewRepository extends JpaRepository<PlanReview, Long> {
+
     @Query("SELECT pr FROM PlanReview pr JOIN FETCH pr.user WHERE pr.plan.planId = :planId ORDER BY pr.createdAt DESC")
     Page<PlanReview> findByPlanIdWithUser(@Param("planId") Long planId, Pageable pageable);
 
     boolean existsByUserAndPlan(User user, Plan plan);
-
-    int countPlanReviewByPlan(Plan plan);
-
-    @Query("SELECT AVG(r.score) FROM PlanReview r WHERE r.plan = :plan")
-    Double getAverageRatingByPlan(@Param("plan") Plan plan);
 
     @Query("SELECT AVG(r.score) FROM PlanReview r WHERE r.plan IS NOT NULL")
     Double findAverageRatingByPlanIsNotNull();
@@ -34,5 +31,4 @@ public interface PlanReviewRepository extends JpaRepository<PlanReview, Long> {
             ") as plan_review_counts",
             nativeQuery = true)
     Double findAverageReviewCountPerPlanNative();
-
 }

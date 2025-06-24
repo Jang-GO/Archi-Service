@@ -42,7 +42,6 @@ public class VasReviewServiceImpl implements VasReviewService {
         Vas vas = vasRepository.findById(vasId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // 중복 리뷰 검사
         if (vasReviewRepository.existsByUserAndVas(user, vas)) {
             throw new AlreadyReviewedException(ErrorCode.ALREADY_REVIEWED.getMessage());
         }
@@ -52,6 +51,7 @@ public class VasReviewServiceImpl implements VasReviewService {
                 .vas(vas)
                 .score(requestDto.getScore())
                 .content(requestDto.getContent())
+                .isModerated(false)
                 .build();
 
         VasReview savedReview = vasReviewRepository.save(review);

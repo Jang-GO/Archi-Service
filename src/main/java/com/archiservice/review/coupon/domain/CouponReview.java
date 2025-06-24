@@ -36,17 +36,22 @@ public class CouponReview extends TimeStamp {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "is_moderated", nullable = false)
+    private Boolean isModerated = false;
+
     @Builder
-    public CouponReview(User user, Coupon coupon, Integer score, String content) {
+    public CouponReview(User user, Coupon coupon, Integer score, String content, boolean isModerated) {
         this.user = user;
         this.coupon = coupon;
         this.score = score;
         this.content = content;
+        this.isModerated = isModerated;
     }
 
     public void updateReview(Integer score, String content) {
         this.score = score;
         this.content = content;
+        this.isModerated=false;
     }
 
     public void validateOwner(Long userId) {
@@ -54,5 +59,6 @@ public class CouponReview extends TimeStamp {
             throw new NotMyReviewException(ErrorCode.NOT_MY_REVIEW.getMessage());
         }
     }
+
 }
 

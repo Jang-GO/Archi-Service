@@ -29,13 +29,13 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<RefreshResponseDto>> refresh(@RequestHeader("Authorization") String refreshToken, @AuthenticationPrincipal CustomUser customUser) {
+    public ResponseEntity<ApiResponse<RefreshResponseDto>> refresh(@CookieValue("refreshToken") String refreshToken) {
         return ResponseEntity.ok(authService.refresh(refreshToken));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<LogoutResponseDto>> logout(@RequestHeader("Authorization") String accessToken) {
-        return ResponseEntity.ok(authService.logout(accessToken));
+    public ResponseEntity<ApiResponse<LogoutResponseDto>> logout(@RequestHeader("Authorization") String accessToken, HttpServletResponse response) {
+        return ResponseEntity.ok(authService.logout(accessToken, response));
     }
 
     @GetMapping("/hash/{password}")

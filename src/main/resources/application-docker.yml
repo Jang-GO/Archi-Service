@@ -26,6 +26,105 @@ spring:
         format_sql: true
     show-sql: true # SQL 로그 출력 여부
 
+  ai:
+    openai:
+      chat:
+        options:
+          model: gpt-4o
+          temperature: 0.7
+          max-tokens: 4096
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 app:
   upload-dir: uploads/
+
+tag:
+  mainTags:
+    - IT
+    - OTT
+    - News
+    - Book
+    - Pet
+    - Delivery
+    - Photo
+    - Life
+    - Food
+    - Car
+    - Movie
+    - OnlineClass
+    - Webtoon
+    - Youtube
+    - Music
+    - Hobby
+    - Cafe
+    - Kids
+  subToMainMapping:
+    it: IT
+    #
+    ott: OTT
+    netflix: OTT
+    disney: OTT
+    tving: OTT
+    drama: OTT
+    #
+    news : News
+    economy: News
+    stock: News
+    #
+    ebook: Book
+    #
+    pet: Pet
+    #
+    delivery: Delivery
+    #
+    photo: Photo
+    #
+    life: Life
+    living: Life
+    shopping: Life
+    store: Life
+    family: Life
+    friend: Life
+    date: Life
+    #
+    dining: Food
+    food: Food
+    #
+    car: Car
+    #
+    movie: Movie
+    #
+    onlineClass: OnlineClass
+    growth: OnlineClass
+    english: OnlineClass
+    chinese: OnlineClass
+    education: OnlineClass
+    #
+    webtoon: Webtoon
+    webnovel: Webtoon
+    #
+    youtube: Youtube
+    #
+    hobby: Hobby
+    baseball: Hobby
+    soccer: Hobby
+    game: Hobby
+    #
+    cafe: Cafe
+    coffee: Cafe
+    bread: Cafe
+    #
+    music: Music
+    kpop: Music
+    #
+    kids: Kids

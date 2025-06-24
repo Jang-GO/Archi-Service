@@ -26,7 +26,20 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
 
         if (isRefreshTokenRequest()) {
-            if (!refreshTokenService.hasRefreshToken(email)) {
+            if (!refreshTokenService.hasRefreshToken(user.getUserId())) {
+                throw new UsernameNotFoundException("Refresh Token이 만료되었습니다. 다시 로그인해주세요.");
+            }
+        }
+
+        return new CustomUser(user);
+    }
+    
+    public CustomUser loadUserByUserId(Long userId) throws UsernameNotFoundException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + userId));
+
+        if (isRefreshTokenRequest()) {
+            if (!refreshTokenService.hasRefreshToken(userId)) {
                 throw new UsernameNotFoundException("Refresh Token이 만료되었습니다. 다시 로그인해주세요.");
             }
         }

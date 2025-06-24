@@ -12,5 +12,5 @@ public interface AuthService {
 
     ApiResponse<RefreshResponseDto> refresh(String refreshTokenHeader);
 
-    ApiResponse<LogoutResponseDto> logout(String accessTokenHeader);
+    ApiResponse<LogoutResponseDto> logout(String accessTokenHeader, HttpServletResponse response);
 }

@@ -6,12 +6,14 @@ import com.archiservice.product.vas.dto.response.VasDetailResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@ToString
 public class RecommendResponseDto {
 
     List<PlanDetailResponseDto> plans;

@@ -2,11 +2,9 @@ package com.archiservice.chatbot.redis;
 
 import io.lettuce.core.RedisCommandExecutionException;
 import jakarta.annotation.PostConstruct;
-import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -28,6 +26,11 @@ public class RedisStreamConfig {
     createConsumerGroup("ai-response-stream", "response-handler");
 
     createConsumerGroup("ai-request-stream", "request-processor");
+
+    createConsumerGroup("image-request-stream", "image-request-processor"); // 스프링 -> AI (ai 서버의 컨슈머가 받음)
+
+    createConsumerGroup("image-response-stream", "image-response-handler"); // AI -> 스프링 (스프링 컨슈머가 받음)
+
 
     log.info("Redis Stream Consumer Groups initialization completed");
   }

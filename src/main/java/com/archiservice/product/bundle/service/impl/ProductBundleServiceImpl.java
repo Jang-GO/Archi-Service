@@ -60,7 +60,7 @@ public class ProductBundleServiceImpl implements ProductBundleService {
         Coupon coupon = couponRepository.findById(requestDto.getCouponId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "라이프혜택을 찾을 수 없음"));
 
-        long finalPrice = plan.getPrice() + vas.getDiscountedPrice() + coupon.getPrice();
+        long finalPrice = plan.getPrice() + vas.getDiscountedPriceAsInteger() + coupon.getPrice();
 
         Optional<ProductBundle> optBundle = productBundleRepository.findByPlanAndVasAndCoupon(plan, vas, coupon);
 
@@ -79,13 +79,12 @@ public class ProductBundleServiceImpl implements ProductBundleService {
                     .plan(plan)
                     .vas(vas)
                     .coupon(coupon)
-                    // TODO :  tagCode 는 추천 조합팀 완성되면 추가
                     .build();
 
-            productBundleRepository.save(newProductBundle);
+            ProductBundle savedBundle = productBundleRepository.save(newProductBundle);
 
             ReservationRequestDto reservationRequestDto = ReservationRequestDto.builder()
-                    .bundleId(newProductBundle.getProductBundleId())
+                    .bundleId(savedBundle.getProductBundleId())
                     .price(finalPrice)
                     .build();
 
@@ -147,24 +146,5 @@ public class ProductBundleServiceImpl implements ProductBundleService {
         }
 
     }
-
-    @Override
-    public long getCombinedTagCode(long planId, long vasId, long couponId) {
-
-        long planTagCode = planRepository.findById(planId)
-                .orElseThrow(() -> new EntityNotFoundException("Plan not found"))
-                .getTagCode();
-
-        long vasTagCode = vasRepository.findById(vasId)
-                .orElseThrow(() -> new EntityNotFoundException("VAS not found"))
-                .getTagCode();
-
-        long couponTagCode = couponRepository.findById(couponId)
-                .orElseThrow(() -> new EntityNotFoundException("Coupon not found"))
-                .getTagCode();
-
-        return planTagCode | vasTagCode | couponTagCode;
-    }
-
 
 }

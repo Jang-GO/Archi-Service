@@ -10,4 +10,5 @@ import java.util.List;
 public interface PlanService {
     Page<PlanResponseDto> getAllPlans(Pageable pageable);
     PlanDetailResponseDto getPlanDetail(Long planId);
+    PlanDetailResponseDto findPlanByName(String planName);
 }

@@ -7,9 +7,12 @@ import com.archiservice.product.plan.dto.response.PlanDetailResponseDto;
 import com.archiservice.product.vas.dto.response.VasDetailResponseDto;
 import com.archiservice.user.dto.request.PasswordUpdateRequestDto;
 import com.archiservice.user.dto.request.ReservationRequestDto;
+import com.archiservice.user.dto.request.TendencyUpdateRequestDto;
+import com.archiservice.advertisement.dto.response.BannerResponseDto;
 import com.archiservice.user.dto.response.ContractDetailResponseDto;
 import com.archiservice.user.dto.response.ProfileResponseDto;
 import com.archiservice.user.dto.response.TendencyResponseDto;
+import com.archiservice.advertisement.service.AiBannerService;
 import com.archiservice.user.service.ContractService;
 import com.archiservice.user.service.UserService;
 import jakarta.validation.Valid;
@@ -28,6 +31,7 @@ import static com.archiservice.user.enums.Period.*;
 public class UserController {
     private final UserService userService;
     private final ContractService contractService;
+    private final AiBannerService aiBannerService;
 
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<ProfileResponseDto>> getUserProfile(@AuthenticationPrincipal CustomUser user) {
@@ -43,6 +47,11 @@ public class UserController {
     @GetMapping("/tendency")
     public ResponseEntity<ApiResponse<List<TendencyResponseDto>>> getUserTendency(@AuthenticationPrincipal CustomUser user) {
         return ResponseEntity.ok(ApiResponse.success(userService.getUserTendency(user)));
+    }
+
+    @PutMapping("/tendency/update")
+    public ResponseEntity<ApiResponse<String>> updateUserTendency(@Valid @RequestBody TendencyUpdateRequestDto request, @AuthenticationPrincipal CustomUser user) {
+        return ResponseEntity.ok(ApiResponse.success(userService.updateTendency(request, user)));
     }
 
     @GetMapping("/current/plans")
@@ -101,4 +110,5 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<ContractDetailResponseDto>>> getHistoryContract(@AuthenticationPrincipal CustomUser user) {
         return ResponseEntity.ok(ApiResponse.success(contractService.getContract(HISTORY, user)));
     }
+
 }

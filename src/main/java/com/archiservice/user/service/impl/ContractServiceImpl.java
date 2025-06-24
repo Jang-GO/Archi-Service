@@ -1,9 +1,9 @@
 package com.archiservice.user.service.impl;
 
-import com.archiservice.common.response.ApiResponse;
 import com.archiservice.common.security.CustomUser;
 import com.archiservice.exception.BusinessException;
 import com.archiservice.exception.ErrorCode;
+import com.archiservice.exception.business.ContractNotFoundException;
 import com.archiservice.exception.business.UserNotFoundException;
 import com.archiservice.product.bundle.domain.ProductBundle;
 import com.archiservice.product.bundle.repository.ProductBundleRepository;
@@ -42,9 +42,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    // Issue : Scheduling Batch, User 를 받는 방식 고민 (시스템이 자동 추가해야하므로, 유저가 직접 추가하는 방식이 아님 -> 현재 컨트롤러가 아닌, 신규 번들 생성 이후 연계로 실행되는 형태)
     public void createContract(ReservationRequestDto requestDto, User user) {
-        // 다음달 계약이 생성되는 시점에는 가장 최근건이 이번달 계약임. -> top1 사용
 
         ProductBundle bundle = productBundleRepository.findById(requestDto.getBundleId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND, "조합 정보가 존재하지 않음"));
@@ -106,8 +104,11 @@ public class ContractServiceImpl implements ContractService {
     public List<ContractDetailResponseDto> getContract(Period period, CustomUser customUser) {
         User user = userRepository.findById(customUser.getId())
                 .orElseThrow(() -> new UserNotFoundException());
-
+        System.out.println( "사용자-> "+ user.getUserId());
         List<ContractDetailResponseDto> contractDetailResponseListDto = contractCustomRepository.findContractByOffset(user, period);
+        for (ContractDetailResponseDto contractDetailResponseDto : contractDetailResponseListDto) {
+            System.out.println("테스트: "+ contractDetailResponseDto);
+        }
 
         return contractDetailResponseListDto;
     }
@@ -139,6 +140,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
+    @Transactional
     public void determineContractAction(ReservationRequestDto requestDto, CustomUser customUser) {
         User user = userRepository.findById(customUser.getId())
                 .orElseThrow(() -> new UserNotFoundException());

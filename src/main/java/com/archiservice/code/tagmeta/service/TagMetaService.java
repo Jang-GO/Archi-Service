@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.archiservice.code.tagmeta.domain.TagMeta;
+
 public interface TagMetaService {
     List<String> extractTagsFromCode(Long tagCode);
+    TagMeta findTagMetaByKey(String Key);
+    Long calculateTagCodeFromKey(List<String> tagKeys);
 }

@@ -9,6 +9,11 @@ import com.archiservice.product.coupon.dto.response.CouponDetailResponseDto;
 import com.archiservice.product.coupon.dto.response.CouponResponseDto;
 import com.archiservice.product.coupon.repository.CouponRepository;
 import com.archiservice.product.coupon.service.CouponService;
+import com.archiservice.product.vas.domain.Vas;
+import com.archiservice.product.vas.dto.response.VasDetailResponseDto;
+import com.archiservice.review.summary.domain.ProductReviewSummary;
+import com.archiservice.review.summary.dto.SimplifiedSummaryResult;
+import com.archiservice.review.summary.repository.ProductReviewSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class CouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
     private final TagMetaService tagMetaService;
     private final CommonCodeService commonCodeService;
+    private final ProductReviewSummaryRepository reviewSummaryRepository;
 
     @Override
     public Page<CouponResponseDto> getAllCoupons(Pageable pageable) {
@@ -46,7 +53,37 @@ public class CouponServiceImpl implements CouponService {
         List<String> tags = tagMetaService.extractTagsFromCode(coupon.getTagCode());
         String category = commonCodeService.getCodeName(CATEGORY_GROUP_CODE, coupon.getCategoryCode());
 
-        return CouponDetailResponseDto.from(coupon, tags, category);
+        Optional<ProductReviewSummary> reviewSummaryOpt = reviewSummaryRepository.findByProductIdAndReviewType(couponId, "COUPON");
+        if(reviewSummaryOpt.isEmpty()) return CouponDetailResponseDto.from(coupon, tags, category);
+
+        SimplifiedSummaryResult simplifiedSummaryResult = SimplifiedSummaryResult.from(reviewSummaryOpt.get());
+        return CouponDetailResponseDto.from(coupon, tags, category, simplifiedSummaryResult);
     }
+
+	@Override
+	public CouponDetailResponseDto findCouponByName(String couponName) {
+		Optional<Coupon> exactMatch = couponRepository.findByCouponName(couponName);
+        if (exactMatch.isPresent()) {
+        	Coupon coupon = exactMatch.get();
+            List<String> tags = tagMetaService.extractTagsFromCode(coupon.getTagCode());
+            String category = commonCodeService.getCodeName(CATEGORY_GROUP_CODE, coupon.getCategoryCode());
+            
+            return CouponDetailResponseDto.from(coupon, tags, category);
+        }
+
+        String normalizedSearchName = couponName.replaceAll("\\s+", "").toLowerCase();
+        List<Coupon> allCoupon = couponRepository.findAll();
+
+        for (Coupon coupon : allCoupon) {
+            String normalizedCouponName = coupon.getCouponName().replaceAll("\\s+", "").toLowerCase();
+            if (normalizedCouponName.contains(normalizedSearchName) || 
+                normalizedSearchName.contains(normalizedCouponName)) {
+                List<String> tags = tagMetaService.extractTagsFromCode(coupon.getTagCode());
+                String category = commonCodeService.getCodeName(CATEGORY_GROUP_CODE, coupon.getCategoryCode());
+                return CouponDetailResponseDto.from(coupon, tags, category);
+            }
+        }
+		return null;
+	}
 }
 
